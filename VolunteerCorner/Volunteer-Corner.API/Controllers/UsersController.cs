@@ -1,9 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Volunteer_Corner.Business.Interfaces;
+using Volunteer_Corner.Business.Models.Requests;
 
 namespace Volunteer_Corner.API.Controllers
 {
@@ -11,36 +9,20 @@ namespace Volunteer_Corner.API.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        // GET: api/Users
-        [HttpGet]
-        public IEnumerable<string> Get()
+        private readonly IUserService _userService;
+
+        public UsersController(IUserService userService)
         {
-            return new string[] { "value1", "value2" };
+            _userService = userService;
         }
 
-        // GET: api/Users/5
-        [HttpGet("{id}", Name = "Get")]
-        public string Get(int id)
+        [HttpPost("[action]")]
+        [AllowAnonymous]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
-            return "value";
-        }
-
-        // POST: api/Users
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
-
-        // PUT: api/Users/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE: api/Users/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            await _userService.RegisterAsync(request);
+            return StatusCode(StatusCodes.Status201Created);
         }
     }
 }
