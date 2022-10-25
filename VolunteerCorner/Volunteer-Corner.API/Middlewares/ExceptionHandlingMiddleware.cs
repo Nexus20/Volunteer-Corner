@@ -23,8 +23,7 @@ namespace Volunteer_Corner.API.Middlewares {
 
             logger.Error(exception, "An exception was thrown as a result of the request");
 
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            context.Response.Redirect("/Error/Error500");
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
         }
     }
 }
