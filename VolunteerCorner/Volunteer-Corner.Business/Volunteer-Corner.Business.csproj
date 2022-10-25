@@ -17,7 +17,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Exceptions" />
     <Folder Include="Interfaces" />
+    <Folder Include="Models\Requests" />
+    <Folder Include="Models\Results" />
     <Folder Include="Services" />
   </ItemGroup>
 
