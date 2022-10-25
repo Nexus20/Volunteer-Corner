@@ -1,3 +1,4 @@
+using Volunteer_Corner.API.Extensions;
 using Volunteer_Corner.Business;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,4 +31,5 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.SetupIdentity();
 app.Run();
