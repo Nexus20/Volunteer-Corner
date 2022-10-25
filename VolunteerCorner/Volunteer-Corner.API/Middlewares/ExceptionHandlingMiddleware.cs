@@ -20,6 +20,11 @@ namespace Volunteer_Corner.API.Middlewares {
                 logger.Information(exception, "Validation exception is occured");
                 context.Response.StatusCode = StatusCodes.Status400BadRequest;
             }
+            catch (IdentityException exception)
+            {
+                logger.Information(exception, "Identity exception is occured");
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+            }
             catch (NotFoundException exception)
             {
                 logger.Information(exception, "Resource not found");

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Volunteer_Corner.Business.Interfaces;
 using Volunteer_Corner.Business.Models.Requests;
+using Volunteer_Corner.Business.Models.Results;
 
 namespace Volunteer_Corner.API.Controllers
 {
@@ -18,11 +19,11 @@ namespace Volunteer_Corner.API.Controllers
 
         [HttpPost("[action]")]
         [AllowAnonymous]
-        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(RegisterResult), StatusCodes.Status201Created)]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
-            await _userService.RegisterAsync(request);
-            return StatusCode(StatusCodes.Status201Created);
+            var result = await _userService.RegisterAsync(request);
+            return StatusCode(StatusCodes.Status201Created, result);
         }
     }
 }
