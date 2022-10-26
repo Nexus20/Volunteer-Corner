@@ -16,14 +16,13 @@ public class UserService : IUserService
 {
     private readonly ApplicationDbContext _dbContext;
     private readonly UserManager<User> _userManager;
-    private readonly SignInManager<User> _signInManager;
     private readonly IMapper _mapper;
     private readonly ILogger<UserService> _logger;
 
-    public UserService(UserManager<User> userManager, SignInManager<User> signInManager, IMapper mapper, ILogger<UserService> logger, ApplicationDbContext dbContext)
+    public UserService(UserManager<User> userManager, IMapper mapper, ILogger<UserService> logger,
+        ApplicationDbContext dbContext)
     {
         _userManager = userManager;
-        _signInManager = signInManager;
         _mapper = mapper;
         _logger = logger;
         _dbContext = dbContext;

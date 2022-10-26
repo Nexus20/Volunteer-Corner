@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Volunteer-Corner.Business",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Volunteer-Corner.Data", "Volunteer-Corner.Data\Volunteer-Corner.Data.csproj", "{A22E70E8-56F7-471D-A264-F02C4547457E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{5CCD1DD5-A0C0-4CF2-A78D-05F794A4F8CA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Volunteer-Corner.BusinessTests", "Volunteer-Corner.BusinessTests\Volunteer-Corner.BusinessTests.csproj", "{FEC1054A-F477-4CE9-90EE-E8C52F1C3559}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,11 +31,18 @@ Global
 		{A22E70E8-56F7-471D-A264-F02C4547457E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A22E70E8-56F7-471D-A264-F02C4547457E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A22E70E8-56F7-471D-A264-F02C4547457E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEC1054A-F477-4CE9-90EE-E8C52F1C3559}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEC1054A-F477-4CE9-90EE-E8C52F1C3559}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEC1054A-F477-4CE9-90EE-E8C52F1C3559}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEC1054A-F477-4CE9-90EE-E8C52F1C3559}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A8898091-2397-4097-A7E9-9AE8B253D31A}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FEC1054A-F477-4CE9-90EE-E8C52F1C3559} = {5CCD1DD5-A0C0-4CF2-A78D-05F794A4F8CA}
 	EndGlobalSection
 EndGlobal
