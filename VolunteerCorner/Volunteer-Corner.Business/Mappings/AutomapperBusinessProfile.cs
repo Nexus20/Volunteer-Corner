@@ -5,9 +5,9 @@ using Volunteer_Corner.Data.Entities.Identity;
 
 namespace Volunteer_Corner.Business.Mappings;
 
-public class MappingProfile : Profile
+public class AutomapperBusinessProfile : Profile
 {
-    public MappingProfile()
+    public AutomapperBusinessProfile()
     {
         CreateMap<RegisterRequest, User>();
         CreateMap<User, RegisterResult>();
