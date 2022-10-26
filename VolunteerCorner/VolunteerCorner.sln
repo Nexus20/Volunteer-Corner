@@ -13,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{5CCD1DD5
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Volunteer-Corner.BusinessTests", "Volunteer-Corner.BusinessTests\Volunteer-Corner.BusinessTests.csproj", "{FEC1054A-F477-4CE9-90EE-E8C52F1C3559}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Volunteer-Corner.ApiTests", "Volunteer-Corner.ApiTests\Volunteer-Corner.ApiTests.csproj", "{C8CD4A93-12DE-4CB6-8399-9DEA28ECB811}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +37,10 @@ Global
 		{FEC1054A-F477-4CE9-90EE-E8C52F1C3559}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FEC1054A-F477-4CE9-90EE-E8C52F1C3559}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FEC1054A-F477-4CE9-90EE-E8C52F1C3559}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8CD4A93-12DE-4CB6-8399-9DEA28ECB811}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8CD4A93-12DE-4CB6-8399-9DEA28ECB811}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8CD4A93-12DE-4CB6-8399-9DEA28ECB811}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8CD4A93-12DE-4CB6-8399-9DEA28ECB811}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -44,5 +50,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{FEC1054A-F477-4CE9-90EE-E8C52F1C3559} = {5CCD1DD5-A0C0-4CF2-A78D-05F794A4F8CA}
+		{C8CD4A93-12DE-4CB6-8399-9DEA28ECB811} = {5CCD1DD5-A0C0-4CF2-A78D-05F794A4F8CA}
 	EndGlobalSection
 EndGlobal

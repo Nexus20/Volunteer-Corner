@@ -44,6 +44,20 @@ public class UserServiceTests
         _userService = new UserService(_mockedUserManager.Object, _mapper, _mockedLogger.Object, _dbContext);
     }
     
+    [TearDown]
+    public void TearDown() {
+        // This method is called AFTER EVERY test had been launched
+        // Do all stuff that needs to be applied after unit tests will end its work 
+        _dbContext.Dispose();
+    }
+    
+    [OneTimeTearDown]
+    public void OneTimeTearDown()
+    {
+        // This method is called AFTER ANY OF THE tests had been launched
+        // Do all stuff that needs to be applied after unit tests will end its work 
+    }
+    
     // Please use Triple A convention (Arrange, Act, Assert)
     // Naming convention
     // <MethodName>_<WhenSomeActionOccurs>_<DoSomeExpectedResult>
