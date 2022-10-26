@@ -18,6 +18,8 @@ public static class BusinessLayerRegistration
         services.AddScoped<IIdentityInitializer, IdentityInitializer>();
 
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<ISignInService, SignInService>();
+        services.AddScoped<JwtHandler>();
 
         return services;
     }
