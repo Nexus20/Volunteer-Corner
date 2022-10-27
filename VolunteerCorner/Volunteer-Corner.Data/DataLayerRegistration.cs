@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Volunteer_Corner.Data.Entities.Identity;
+using Volunteer_Corner.Data.Interfaces;
+using Volunteer_Corner.Data.Repositories;
 
 namespace Volunteer_Corner.Data;
 
@@ -21,6 +23,8 @@ public static class DataLayerRegistration
             .AddSignInManager<SignInManager<User>>()
             .AddRoleManager<RoleManager<Role>>()
             .AddUserManager<UserManager<User>>();
+
+        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
         return services;
     }
