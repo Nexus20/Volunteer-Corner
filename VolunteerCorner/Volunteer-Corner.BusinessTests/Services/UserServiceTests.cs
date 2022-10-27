@@ -43,21 +43,22 @@ public class UserServiceTests
 
         _userService = new UserService(_mockedUserManager.Object, _mapper, _mockedLogger.Object, _dbContext);
     }
-    
+
     [TearDown]
-    public void TearDown() {
+    public void TearDown()
+    {
         // This method is called AFTER EVERY test had been launched
         // Do all stuff that needs to be applied after unit tests will end its work 
         _dbContext.Dispose();
     }
-    
+
     [OneTimeTearDown]
     public void OneTimeTearDown()
     {
         // This method is called AFTER ANY OF THE tests had been launched
         // Do all stuff that needs to be applied after unit tests will end its work 
     }
-    
+
     // Please use Triple A convention (Arrange, Act, Assert)
     // Naming convention
     // <MethodName>_<WhenSomeActionOccurs>_<DoSomeExpectedResult>
@@ -74,41 +75,190 @@ public class UserServiceTests
         const string expectedMessage = "Invalid account type";
 
         // Act
-        var action = async () =>
-        {
-            await _userService.RegisterAsync(request);
-        };
-        
+        var action = async () => { await _userService.RegisterAsync(request); };
+
         // Assert
         await action.Should().ThrowAsync<ValidationException>()
             .WithMessage(expectedMessage);
     }
-    
+
     [Test]
     public async Task RegisterAsync_WhenUserWithSuchLoginAlreadyExists_ThrowsValidationException()
     {
         // Arrange
-        const string existingLogin = "Some existing login"; 
-        
+        const string existingLogin = "Some existing login";
+
         var request = new RegisterRequest()
         {
             AccountType = AccountType.Volunteer,
             UserName = existingLogin
         };
-        
+
         var expectedMessage = $"User with such login {request.UserName} already exists";
 
         _mockedUserManager.Setup(m => m.FindByNameAsync(It.IsAny<string>()))
             .ReturnsAsync(new User());
 
         // Act
+        var action = async () => { await _userService.RegisterAsync(request); };
+
+        // Assert
+        await action.Should().ThrowAsync<ValidationException>()
+            .WithMessage(expectedMessage);
+    }
+
+    [Test]
+    public async Task RegisterAsync_WhenUserWithSuchEmailISAlreadyExist_ThrowsValidationException()
+    {
+        // Arrange
+
+        const string existingEmail = $"Some exciting email";
+
+        var request = new RegisterRequest()
+        {
+            AccountType = AccountType.HelpSeeker,
+            Email = existingEmail
+        };
+
+        var message = $"User with such email {request.Email} already exists";
+
+        _mockedUserManager.Setup(m => m.FindByEmailAsync(It.IsAny<string>()))
+            .ReturnsAsync(new User());
+
+        // Act
+
+        var action = async () => { await _userService.RegisterAsync(request); };
+
+        //Assert
+
+        await action.Should().ThrowAsync<ValidationException>()
+            .WithMessage(message);
+    }
+
+    [Test]
+    public async Task RegisterAsync_WhenUserTypeIsNotDefine_ThrowsIdentityException() //NAME OF THE METHOD
+    {
+        // Arrange
+
+        const string password = "Some user password";
+        const string userName = "Some user name";
+
+        var identityResult = IdentityResult.Failed(new IdentityError()
+        {
+            Code = "123",
+            Description = "Error with brain of new customer"
+        });
+
+        var request = new RegisterRequest()
+        {
+            AccountType = AccountType.HelpSeeker,
+            UserName = userName,
+            Password = password
+        };
+
+        _mockedUserManager.Setup(m => m.CreateAsync(
+                It.IsAny<User>(),
+                It.IsAny<string>()))
+            .ReturnsAsync(identityResult);
+
+        // Act
+
+        var action = async () => { await _userService.RegisterAsync(request); };
+
+        // Assert
+
+        await action.Should().ThrowAsync<IdentityException>();
+    }
+
+    [Test]
+    public async Task RegisterAsync_WhenAddToRolesAsyncFailed_ThrowsIdentityException() //NAME OF THE METHOD
+    {
+        // Arrange
+
+        const string password = "Some user password";
+        const string userName = "Some user name";
+        const string userEmail = "Some user Email";
+
+
+        var identityResult = IdentityResult.Failed(new IdentityError()
+        {
+            Code = "123",
+            Description = "Error with brain of new customer"
+        });
+
+        var request = new RegisterRequest()
+        {
+            AccountType = AccountType.HelpSeeker,
+            UserName = userName,
+            Password = password,
+            Email = userEmail,
+        };
+
+        _mockedUserManager.Setup(m => m.CreateAsync(
+                It.IsAny<User>(),
+                It.IsAny<string>()))
+            .ReturnsAsync(IdentityResult.Success);
+
+        _mockedUserManager.Setup(m => m.AddToRolesAsync(
+                It.IsAny<User>(),
+                It.IsAny<List<string>>()))
+            .ReturnsAsync(identityResult);
+
+        // Act
+
         var action = async () =>
         {
             await _userService.RegisterAsync(request);
         };
-        
+
         // Assert
-        await action.Should().ThrowAsync<ValidationException>()
-            .WithMessage(expectedMessage);
+
+        await action.Should().ThrowAsync<IdentityException>();
+    }
+
+
+    // КАК ПРОВЕРИТЬ РАБОТОСПОСОБНОСТЬ ТЕСТА
+
+    [Test]
+    public async Task RegisterAsync_WhenAllIsRight_ThrowsNoException()
+    {
+        //Arrange
+
+        const string password = "Some user password";
+        const string userName = "Some user name";
+        const string userEmail = "Some user Email";
+
+        var request = new RegisterRequest()
+        {
+            AccountType = AccountType.HelpSeeker,
+            UserName = userName,
+            Password = password,
+            Email = userEmail
+        };
+
+        var user = _mapper.Map<RegisterRequest, User>(request);
+
+        user.Id = Guid.NewGuid().ToString();
+
+        var expectedResult = _mapper.Map<User, RegisterRequest>(user);
+
+        _mockedUserManager.Setup(m => m.CreateAsync(It.IsAny<User>(),
+                It.IsAny<string>()))
+            .ReturnsAsync(IdentityResult.Success);
+
+        _mockedUserManager.Setup(m => m.AddToRolesAsync(
+                It.IsAny<User>(),
+                It.IsAny<List<string>>()))
+            .ReturnsAsync(IdentityResult.Success);
+
+        
+
+        // Act
+
+        var actualResult = await _userService.RegisterAsync(request);
+
+        // Assert
+
+        actualResult.Should().BeEquivalentTo(expectedResult, )
     }
 }
