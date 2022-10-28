@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using FluentAssertions;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
@@ -8,7 +9,9 @@ using Volunteer_Corner.Business.Exceptions;
 using Volunteer_Corner.Business.Interfaces;
 using Volunteer_Corner.Business.Models.Enums;
 using Volunteer_Corner.Business.Models.Requests;
+using Volunteer_Corner.Business.Models.Results;
 using Volunteer_Corner.Business.Services;
+using Volunteer_Corner.BusinessTests.EqualityComparers;
 using Volunteer_Corner.Data;
 using Volunteer_Corner.Data.Entities.Identity;
 
@@ -215,12 +218,9 @@ public class UserServiceTests
 
         await action.Should().ThrowAsync<IdentityException>();
     }
-
-
-    // КАК ПРОВЕРИТЬ РАБОТОСПОСОБНОСТЬ ТЕСТА
-
+    
     [Test]
-    public async Task RegisterAsync_WhenAllIsRight_ThrowsNoException()
+    public async Task RegisterAsync_WhenAllIsRight_ReturnsCorrectResult()
     {
         //Arrange
 
@@ -238,9 +238,7 @@ public class UserServiceTests
 
         var user = _mapper.Map<RegisterRequest, User>(request);
 
-        user.Id = Guid.NewGuid().ToString();
-
-        var expectedResult = _mapper.Map<User, RegisterRequest>(user);
+        var expectedResult = _mapper.Map<User, RegisterResult>(user);
 
         _mockedUserManager.Setup(m => m.CreateAsync(It.IsAny<User>(),
                 It.IsAny<string>()))
@@ -250,15 +248,84 @@ public class UserServiceTests
                 It.IsAny<User>(),
                 It.IsAny<List<string>>()))
             .ReturnsAsync(IdentityResult.Success);
-
         
-
         // Act
-
         var actualResult = await _userService.RegisterAsync(request);
 
         // Assert
+        actualResult.Should()
+            .BeEquivalentTo(expectedResult, o => o.Using(new RegisterResultEqualityComparer()));
+    }
 
-        actualResult.Should().BeEquivalentTo(expectedResult, )
+    [Test]
+    public async Task RegisterAsync_WhenAccountTimeSetToHelpSeeker_CreatesHelpSeekerProfile()
+    {
+        //Arrange
+
+        const string password = "Some user password";
+        const string userName = "Some user name";
+        const string userEmail = "Some user Email";
+
+        var request = new RegisterRequest()
+        {
+            AccountType = AccountType.HelpSeeker,
+            UserName = userName,
+            Password = password,
+            Email = userEmail
+        };
+
+        var expectedHelpSeekersCount = await _dbContext.HelpSeekers.CountAsync() + 1;
+        
+        _mockedUserManager.Setup(m => m.CreateAsync(It.IsAny<User>(),
+                It.IsAny<string>()))
+            .ReturnsAsync(IdentityResult.Success);
+
+        _mockedUserManager.Setup(m => m.AddToRolesAsync(
+                It.IsAny<User>(),
+                It.IsAny<List<string>>()))
+            .ReturnsAsync(IdentityResult.Success);
+        
+        // Act
+        await _userService.RegisterAsync(request);
+        var actualHelpSeekersCount = await _dbContext.HelpSeekers.CountAsync();
+        
+        // Assert
+        actualHelpSeekersCount.Should().Be(expectedHelpSeekersCount);
+    }
+    
+    [Test]
+    public async Task RegisterAsync_WhenAccountTimeSetToVolunteer_CreatesVolunteerProfile()
+    {
+        //Arrange
+
+        const string password = "Some user password";
+        const string userName = "Some user name";
+        const string userEmail = "Some user Email";
+
+        var request = new RegisterRequest()
+        {
+            AccountType = AccountType.Volunteer,
+            UserName = userName,
+            Password = password,
+            Email = userEmail
+        };
+
+        var expectedVolunteersCount = await _dbContext.Volunteers.CountAsync() + 1;
+        
+        _mockedUserManager.Setup(m => m.CreateAsync(It.IsAny<User>(),
+                It.IsAny<string>()))
+            .ReturnsAsync(IdentityResult.Success);
+
+        _mockedUserManager.Setup(m => m.AddToRolesAsync(
+                It.IsAny<User>(),
+                It.IsAny<List<string>>()))
+            .ReturnsAsync(IdentityResult.Success);
+        
+        // Act
+        await _userService.RegisterAsync(request);
+        var actualVolunteersCount = await _dbContext.Volunteers.CountAsync();
+        
+        // Assert
+        actualVolunteersCount.Should().Be(expectedVolunteersCount);
     }
 }
