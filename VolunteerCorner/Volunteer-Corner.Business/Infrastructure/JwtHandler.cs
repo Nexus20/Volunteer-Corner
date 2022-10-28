@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Volunteer_Corner.Data.Entities.Identity;
 
-namespace Volunteer_Corner.Business.Services;
+namespace Volunteer_Corner.Business.Infrastructure;
 
 public class JwtHandler {
     
@@ -20,7 +20,7 @@ public class JwtHandler {
     
     public SigningCredentials GetSigningCredentials() {
         
-        var key = Encoding.UTF8.GetBytes(_jwtSettings.GetSection("securityKey").Value);
+        var key = Encoding.UTF8.GetBytes(_jwtSettings["securityKey"]);
         var secret = new SymmetricSecurityKey(key);
         return new SigningCredentials(secret, SecurityAlgorithms.HmacSha256);
     }

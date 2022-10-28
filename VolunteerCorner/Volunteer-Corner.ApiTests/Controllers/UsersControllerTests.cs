@@ -14,6 +14,7 @@ namespace Volunteer_Corner.ApiTests.Controllers;
 public class UsersControllerTests
 {
     private Mock<IUserService> _mockedUserService = null!;
+    private Mock<ISignInService> _mockedSignInService = null!;
     private UsersController _usersController = null!;
     
     [OneTimeSetUp]
@@ -29,7 +30,8 @@ public class UsersControllerTests
         // This method is called BEFORE EACH OF THE tests will be launched
         // Do initializing stuff that needs to be applied before each test
         _mockedUserService = new Mock<IUserService>();
-        _usersController = new UsersController(_mockedUserService.Object);
+        _mockedSignInService = new Mock<ISignInService>();
+        _usersController = new UsersController(_mockedUserService.Object, _mockedSignInService.Object);
     }
 
     [Test]
