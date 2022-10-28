@@ -8,6 +8,7 @@ using Volunteer_Corner.Business.Exceptions;
 using Volunteer_Corner.Business.Interfaces;
 using Volunteer_Corner.Business.Models.Enums;
 using Volunteer_Corner.Business.Models.Requests;
+using Volunteer_Corner.Business.Models.Results;
 using Volunteer_Corner.Business.Services;
 using Volunteer_Corner.Data;
 using Volunteer_Corner.Data.Entities.Identity;
@@ -240,7 +241,7 @@ public class UserServiceTests
 
         user.Id = Guid.NewGuid().ToString();
 
-        var expectedResult = _mapper.Map<User, RegisterRequest>(user);
+        var expectedResult = _mapper.Map<User, RegisterResult>(user);
 
         _mockedUserManager.Setup(m => m.CreateAsync(It.IsAny<User>(),
                 It.IsAny<string>()))
@@ -259,6 +260,6 @@ public class UserServiceTests
 
         // Assert
 
-        actualResult.Should().BeEquivalentTo(expectedResult, )
+        actualResult.Should().BeEquivalentTo(expectedResult);
     }
 }
