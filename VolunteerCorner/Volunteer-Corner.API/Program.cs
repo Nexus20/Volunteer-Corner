@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Volunteer_Corner.API.Extensions;
 using Volunteer_Corner.Business;
 using Serilog;
@@ -56,7 +57,7 @@ builder.Services.AddAuthentication(opt =>
                 {
                     var authenticationException = context.AuthenticateFailure as SecurityTokenExpiredException;
                     context.Response.Headers.Add("x-token-expired", authenticationException.Expires.ToString("o"));
-                    context.ErrorDescription = $"The token expired on {authenticationException.Expires.ToString("o")}";
+                    context.ErrorDescription = $"The token expired on {authenticationException.Expires:o}";
                 }
 
                 return context.Response.WriteAsync(JsonSerializer.Serialize(new
@@ -80,7 +81,29 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Volunteer Corner API", Version = "v1" });
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme {
+        In = ParameterLocation.Header, 
+        Description = "Please insert JWT with Bearer into field",
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey 
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement {
+        { 
+            new OpenApiSecurityScheme 
+            { 
+                Reference = new OpenApiReference 
+                { 
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer" 
+                } 
+            },
+            Array.Empty<string>()
+        } 
+    });
+});
 
 var app = builder.Build();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
