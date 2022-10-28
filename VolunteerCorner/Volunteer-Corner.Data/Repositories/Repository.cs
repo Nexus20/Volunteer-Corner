@@ -24,8 +24,8 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEnti
         return _db.Set<TEntity>().Where(predicate).ToListAsync();
     }
 
-    public Task<List<TEntity>> GetAsync(Expression<Func<TEntity, bool>> predicate = null,
-        Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, string includeString = null,
+    public Task<List<TEntity>> GetAsync(Expression<Func<TEntity, bool>>? predicate = null,
+        Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, string? includeString = null,
         bool disableTracking = true)
     {
         var query = _db.Set<TEntity>().AsQueryable();
@@ -45,9 +45,9 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEnti
         return query.ToListAsync();
     }
 
-    public Task<List<TEntity>> GetAsync(Expression<Func<TEntity, bool>> predicate = null,
+    public Task<List<TEntity>> GetAsync(Expression<Func<TEntity, bool>>? predicate = null,
         Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
-        List<Expression<Func<TEntity, object>>> includes = null, bool disableTracking = true)
+        List<Expression<Func<TEntity, object>>>? includes = null, bool disableTracking = true)
     {
         var query = _db.Set<TEntity>().AsQueryable();
 

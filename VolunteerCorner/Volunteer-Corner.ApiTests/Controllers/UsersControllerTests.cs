@@ -10,11 +10,12 @@
 
 //namespace Volunteer_Corner.ApiTests.Controllers;
 
-//[TestFixture]
-//public class UsersControllerTests
-//{
-//    private Mock<IUserService> _mockedUserService = null!;
-//    private UsersController _usersController = null!;
+[TestFixture]
+public class UsersControllerTests
+{
+    private Mock<IUserService> _mockedUserService = null!;
+    private Mock<ISignInService> _mockedSignInService = null!;
+    private UsersController _usersController = null!;
     
 //    [OneTimeSetUp]
 //    public void OneTimeSetUp()
@@ -23,14 +24,15 @@
 //        // Do common initializing stuff
 //    }
 
-//    [SetUp]
-//    public void SetUp()
-//    {
-//        // This method is called BEFORE EACH OF THE tests will be launched
-//        // Do initializing stuff that needs to be applied before each test
-//        _mockedUserService = new Mock<IUserService>();
-//        _usersController = new UsersController(_mockedUserService.Object);
-//    }
+    [SetUp]
+    public void SetUp()
+    {
+        // This method is called BEFORE EACH OF THE tests will be launched
+        // Do initializing stuff that needs to be applied before each test
+        _mockedUserService = new Mock<IUserService>();
+        _mockedSignInService = new Mock<ISignInService>();
+        _usersController = new UsersController(_mockedUserService.Object, _mockedSignInService.Object);
+    }
 
 //    [Test]
 //    public async Task Register_WhenUserRegisteredSuccessfully_ReturnsStatus201()

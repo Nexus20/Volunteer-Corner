@@ -72,12 +72,12 @@ public class UserService : IUserService
         }
         else if(request.AccountType == AccountType.Volunteer)
         {
-            var helpSeekerProfile = new HelpSeeker
+            var volunteerProfile = new Volunteer
             {
                 UserId = user.Id
             };
 
-            await _dbContext.HelpSeekers.AddAsync(helpSeekerProfile);
+            await _dbContext.Volunteers.AddAsync(volunteerProfile);
         }
 
         await _dbContext.SaveChangesAsync();
