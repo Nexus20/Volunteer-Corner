@@ -13,11 +13,7 @@ public class RegisterRequest
     [Required]
     [Display(Name = "Last name")]
     public string LastName { get; set; } = null!;
-    
-    [Required]
-    [Display(Name = "Patronymic")]
-    public string Patronymic { get; set; } = null!;
-    
+
     [Required]
     [Display(Name = "User name")]
     public string UserName { get; set; } = null!;
