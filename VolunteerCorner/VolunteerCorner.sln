@@ -3,17 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32922.545
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Volunteer-Corner.API", "Volunteer-Corner.API\Volunteer-Corner.API.csproj", "{68FECAF5-CC67-41D9-BB7B-FCDF191CBC05}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Volunteer-Corner.API", "Volunteer-Corner.API\Volunteer-Corner.API.csproj", "{68FECAF5-CC67-41D9-BB7B-FCDF191CBC05}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Volunteer-Corner.Business", "Volunteer-Corner.Business\Volunteer-Corner.Business.csproj", "{75787AE6-2519-4A04-8322-A6F4CB6FD7D6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Volunteer-Corner.Business", "Volunteer-Corner.Business\Volunteer-Corner.Business.csproj", "{75787AE6-2519-4A04-8322-A6F4CB6FD7D6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Volunteer-Corner.Data", "Volunteer-Corner.Data\Volunteer-Corner.Data.csproj", "{A22E70E8-56F7-471D-A264-F02C4547457E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Volunteer-Corner.Data", "Volunteer-Corner.Data\Volunteer-Corner.Data.csproj", "{A22E70E8-56F7-471D-A264-F02C4547457E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{5CCD1DD5-A0C0-4CF2-A78D-05F794A4F8CA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Volunteer-Corner.BusinessTests", "Volunteer-Corner.BusinessTests\Volunteer-Corner.BusinessTests.csproj", "{FEC1054A-F477-4CE9-90EE-E8C52F1C3559}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Volunteer-Corner.BusinessTests", "Volunteer-Corner.BusinessTests\Volunteer-Corner.BusinessTests.csproj", "{FEC1054A-F477-4CE9-90EE-E8C52F1C3559}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Volunteer-Corner.ApiTests", "Volunteer-Corner.ApiTests\Volunteer-Corner.ApiTests.csproj", "{C8CD4A93-12DE-4CB6-8399-9DEA28ECB811}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Volunteer-Corner.ApiTests", "Volunteer-Corner.ApiTests\Volunteer-Corner.ApiTests.csproj", "{C8CD4A93-12DE-4CB6-8399-9DEA28ECB811}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Volunteer-Corner.DataTests", "Volunteer-Corner.DataTests\Volunteer-Corner.DataTests.csproj", "{14302182-11AD-4596-8031-E972447F9B9A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,15 +43,20 @@ Global
 		{C8CD4A93-12DE-4CB6-8399-9DEA28ECB811}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C8CD4A93-12DE-4CB6-8399-9DEA28ECB811}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C8CD4A93-12DE-4CB6-8399-9DEA28ECB811}.Release|Any CPU.Build.0 = Release|Any CPU
+		{14302182-11AD-4596-8031-E972447F9B9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14302182-11AD-4596-8031-E972447F9B9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14302182-11AD-4596-8031-E972447F9B9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14302182-11AD-4596-8031-E972447F9B9A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {A8898091-2397-4097-A7E9-9AE8B253D31A}
-	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{FEC1054A-F477-4CE9-90EE-E8C52F1C3559} = {5CCD1DD5-A0C0-4CF2-A78D-05F794A4F8CA}
 		{C8CD4A93-12DE-4CB6-8399-9DEA28ECB811} = {5CCD1DD5-A0C0-4CF2-A78D-05F794A4F8CA}
+		{14302182-11AD-4596-8031-E972447F9B9A} = {5CCD1DD5-A0C0-4CF2-A78D-05F794A4F8CA}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A8898091-2397-4097-A7E9-9AE8B253D31A}
 	EndGlobalSection
 EndGlobal
