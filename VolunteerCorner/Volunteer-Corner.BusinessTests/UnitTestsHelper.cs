@@ -10,7 +10,7 @@ using Volunteer_Corner.Data.Entities.Identity;
 
 namespace Volunteer_Corner.BusinessTests;
 
-public static class UnitTestsHelper
+internal static class UnitTestsHelper
 {
     public static IConfiguration GetConfiguration()
     {
