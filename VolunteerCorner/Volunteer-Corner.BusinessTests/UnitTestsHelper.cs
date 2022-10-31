@@ -16,7 +16,10 @@ internal static class UnitTestsHelper
     {
         // Add here needed configuration to mock appsettings.json file
         var inMemorySettings = new Dictionary<string, string> {
-            {"SectionName:SomeKey", "SectionValue"},
+            {"JWTSettings:securityKey", "VolunteerCornerSecret"},
+            {"JWTSettings:validIssuer", "VolunteerCornerAPI"},
+            {"JWTSettings:validAudience", "VolunteerCornerAPI"},
+            {"JWTSettings:expiryInMinutes", "60"},
         };
 
         return new ConfigurationBuilder()
