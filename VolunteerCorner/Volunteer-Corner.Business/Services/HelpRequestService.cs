@@ -33,9 +33,12 @@ public class HelpRequestService : IHelpRequestService
         return result;
     }
 
-    public Task<HelpRequestResult> GetHelpRequestById(string requestId)
+    public async Task<HelpRequestResult> GetHelpRequestById(string requestId)
     {
-        throw new NotImplementedException();
+        var source = await _helpRequestRepository.GetByIdAsync(requestId);
+
+        var result = _mapper.Map<HelpRequest, HelpRequestResult>(source);
+        return result;
     }
 
     private Expression<Func<HelpRequest, bool>>? CreateFilterPredicate(GetAllHelpRequestsRequest request)
