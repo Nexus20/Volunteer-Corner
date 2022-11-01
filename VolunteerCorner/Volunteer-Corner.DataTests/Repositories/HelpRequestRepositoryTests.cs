@@ -198,26 +198,24 @@ namespace Volunteer_Corner.DataTests.Repositories
         {
             // Arrange
 
-            var HelpRequest = new HelpRequest()
+            var expectedResult = new List<HelpRequest>()
             {
-                Id = "3",
-                Name = "NEW NAME 3",
-                Description = "NEW DESCRIPTION 3",
-                Status = HelpRequestStatus.Closed,
-                OwnerId = "3",
+                new HelpRequest()
+                {
+                    Id = "3",
+                    Name = "Help request 3 Name",
+                    Description = "NEW DESCRIPTION",
+                    OwnerId = "3",
+                    Status = HelpRequestStatus.Closed
+                }
             };
 
-            _dbContext.Entry(HelpRequest).State = EntityState.Modified;
-            await _dbContext.SaveChangesAsync();
 
-            Expression<Func<HelpRequest, bool>> predicate = x =>
-               x.Name.Contains("request 3");
-
-            var expectedResult = _dbContext.HelpRequests.Where(predicate).ToListAsync();
+            Expression<Func<HelpRequest, bool>> predicate = x => x.Name.Contains("request 3");
 
             // Act
-            _repository.UpdateAsync(HelpRequest);
-            var actualResult = _repository.GetAsync(predicate);
+            await _repository.UpdateAsync(expectedResult[0]);
+            var actualResult = await _repository.GetAsync(predicate);
 
             // Assert
             actualResult.Should().BeEquivalentTo(expectedResult);
