@@ -112,6 +112,7 @@ namespace Volunteer_Corner.DataTests.Repositories
         [Test]
         public async Task GetAsync_WhenFilterAndSequenceAreApplied_ReturnDataAccordingToFilters()
         {
+            // Arrange
             Expression<Func<HelpRequest, bool>> predicate = x => x.Status == HelpRequestStatus.Active
                                                                  && (x.Name.Contains("request 1") || x.Name.Contains("request 3"));
             Func<IQueryable<HelpRequest>, IOrderedQueryable<HelpRequest>> orderBy = x => x.OrderByDescending(x => x.OwnerId);
@@ -127,6 +128,107 @@ namespace Volunteer_Corner.DataTests.Repositories
 
             // Act
             var actualResult = await _repository.GetAsync(predicate, orderBy, includeString);
+
+            // Assert
+            actualResult.Should().BeEquivalentTo(expectedResult);
+        }
+
+        [Test]
+        public async Task GetById_WhenIdAreApplied_ReturnDataAccordingToId()
+        {
+            // Arrange
+
+            var id = "1";
+
+            var expectedResult = await _dbContext.HelpRequests
+                .FirstOrDefaultAsync(i => i.Id == id); ;
+
+            // Act
+            var actualResult = await _repository.GetByIdAsync(id);
+
+            // Assert
+            actualResult.Should().BeEquivalentTo(expectedResult);
+        }
+
+        [Test]
+        public async Task AddAsync_WhenOwnerAddNewHelpRequest_NumberOfRequestsIncreasesByOne()
+        {
+            // Arrange
+
+            var newHelpRequest = new HelpRequest()
+            {
+                Id = "4",
+                Name = "Help request 4 Name",
+                Description = "Help request 4 Description",
+                Status = HelpRequestStatus.Active,
+                OwnerId = "3"
+            };
+
+            await _dbContext.AddAsync(newHelpRequest);
+            await _dbContext.SaveChangesAsync();
+
+            Expression<Func<HelpRequest, bool>> predicate = x => x.Status == HelpRequestStatus.Active;
+
+            var expectedResult  =  _dbContext.HelpRequests.Where(predicate).ToListAsync().Result;
+
+            // Act
+            _repository.AddAsync(newHelpRequest);
+            var actualResult =  _repository.GetAsync(predicate).Result;
+
+            // Assert
+            actualResult.Should().BeEquivalentTo(expectedResult);
+        }
+
+        [Test]
+        public async Task DeleteAsync_WhenOwnerDeleteHelpRequest_NumberOfRequestsDecreasesByOne()
+        {
+            // Arrange
+
+            var HelpRequest = new HelpRequest()
+            {
+                Id = "3"
+            };
+
+            _dbContext.Remove(HelpRequest);
+            await _dbContext.SaveChangesAsync();
+
+            Expression<Func<HelpRequest, bool>> predicate = x => x.Status == HelpRequestStatus.Active;
+
+            var expectedResult = _dbContext.HelpRequests.Where(predicate).ToListAsync().Result;
+
+            // Act
+            _repository.DeleteAsync(HelpRequest);
+            var actualResult = _repository.GetAsync(predicate).Result;
+
+            // Assert
+            actualResult.Should().BeEquivalentTo(expectedResult);
+        }
+
+        [Test]
+        public async Task UpdateAsync_WhenOwnerUpdateHelpRequest_RequestHasModifiedAttributeAndNewData()
+        {
+            // Arrange
+
+            var HelpRequest = new HelpRequest()
+            {
+                Id = "3",
+                Name = "NEW NAME 3",
+                Description = "NEW DESCRIPTION 3",
+                Status = HelpRequestStatus.Closed,
+                OwnerId = "3",
+            };
+
+            _dbContext.Entry(HelpRequest).State = EntityState.Modified;
+            await _dbContext.SaveChangesAsync();
+
+            Expression<Func<HelpRequest, bool>> predicate = x =>
+               x.Name.Contains("request 3");
+
+            var expectedResult = _dbContext.HelpRequests.Where(predicate).ToListAsync();
+
+            // Act
+            _repository.UpdateAsync(HelpRequest);
+            var actualResult = _repository.GetAsync(predicate);
 
             // Assert
             actualResult.Should().BeEquivalentTo(expectedResult);
