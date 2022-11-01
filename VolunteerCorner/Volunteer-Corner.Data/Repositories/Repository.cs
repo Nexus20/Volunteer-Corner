@@ -1,34 +1,75 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Volunteer_Corner.Data.Entities;
 using Volunteer_Corner.Data.Entities.Abstract;
 using Volunteer_Corner.Data.Interfaces;
 
 namespace Volunteer_Corner.Data.Repositories;
 
+public class HelpRequestRepository : Repository<HelpRequest>, IHelpRequestRepository
+{
+    private readonly ILogger<HelpRequestRepository> _logger;
+
+    public HelpRequestRepository(ApplicationDbContext db, ILogger<HelpRequestRepository> logger) : base(db)
+    {
+        _logger = logger;
+    }
+
+    public override async Task<HelpRequest> AddAsync(HelpRequest entity)
+    {
+        await using var transaction = await Db.Database.BeginTransactionAsync();
+        try
+        {
+            await Db.AddAsync(entity);
+            await Db.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return entity;
+        }
+        catch (Exception e)
+        {
+            await transaction.RollbackAsync();
+            _logger.LogError("Error while creating a new help request: {EMessage}", e.Message);
+        }
+
+        return null;
+    }
+
+    public override Task<HelpRequest?> GetByIdAsync(string id)
+    {
+        return Db.HelpRequests.AsNoTracking()
+            .Include(x => x.AdditionalDocuments)
+            .Include(x => x.Owner)
+            .ThenInclude(x => x.User)
+            .FirstOrDefaultAsync(x => x.Id == id);
+    }
+}
+
 public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEntity
 {
-    protected readonly ApplicationDbContext _db;
+    protected readonly ApplicationDbContext Db;
 
     public Repository(ApplicationDbContext db)
     {
-        _db = db;
+        Db = db;
     }
 
     public Task<List<TEntity>> GetAllAsync()
     {
-        return _db.Set<TEntity>().ToListAsync();
+        return Db.Set<TEntity>().ToListAsync();
     }
 
     public Task<List<TEntity>> GetAsync(Expression<Func<TEntity, bool>> predicate)
     {
-        return _db.Set<TEntity>().Where(predicate).ToListAsync();
+        return Db.Set<TEntity>().Where(predicate).ToListAsync();
     }
 
     public Task<List<TEntity>> GetAsync(Expression<Func<TEntity, bool>>? predicate = null,
         Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, string? includeString = null,
         bool disableTracking = true)
     {
-        var query = _db.Set<TEntity>().AsQueryable();
+        var query = Db.Set<TEntity>().AsQueryable();
 
         if (predicate != null)
             query = query.Where(predicate);
@@ -49,7 +90,7 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEnti
         Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
         List<Expression<Func<TEntity, object>>>? includes = null, bool disableTracking = true)
     {
-        var query = _db.Set<TEntity>().AsQueryable();
+        var query = Db.Set<TEntity>().AsQueryable();
 
         if (predicate != null)
             query = query.Where(predicate);
@@ -68,28 +109,28 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEnti
         return query.ToListAsync();
     }
 
-    public Task<TEntity?> GetByIdAsync(string id)
+    public virtual Task<TEntity?> GetByIdAsync(string id)
     {
-        return _db.Set<TEntity>().FirstOrDefaultAsync(i => i.Id == id);
+        return Db.Set<TEntity>().FirstOrDefaultAsync(i => i.Id == id);
     }
 
-    public async Task<TEntity> AddAsync(TEntity entity)
+    public virtual async Task<TEntity> AddAsync(TEntity entity)
     {
-        await _db.Set<TEntity>().AddAsync(entity);
-        await _db.SaveChangesAsync();
+        await Db.Set<TEntity>().AddAsync(entity);
+        await Db.SaveChangesAsync();
 
         return entity;
     }
 
     public async Task UpdateAsync(TEntity entity)
     {
-        _db.Entry(entity).State = EntityState.Modified;
-        await _db.SaveChangesAsync();
+        Db.Entry(entity).State = EntityState.Modified;
+        await Db.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(TEntity entity)
     {
-        _db.Set<TEntity>().Remove(entity);
-        await _db.SaveChangesAsync();
+        Db.Set<TEntity>().Remove(entity);
+        await Db.SaveChangesAsync();
     }
 }
