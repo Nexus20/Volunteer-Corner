@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -39,8 +40,12 @@ namespace Volunteer_Corner.API.Controllers
 
         // POST: api/HelpRequests
         [HttpPost]
-        public void Post([FromBody] string value)
+        [ProducesResponseType(typeof(HelpRequestResult), StatusCodes.Status201Created)]
+        public async Task<IActionResult> Post([FromForm] CreateHelpRequestRequest request)
         {
+            var result = await _helpRequestService.CreateAsync(request, Request.Form.Files, Directory.GetCurrentDirectory());
+
+            return StatusCode(StatusCodes.Status201Created, result);
         }
 
         // PUT: api/HelpRequests/5

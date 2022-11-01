@@ -1,10 +1,14 @@
 ﻿using System.Linq.Expressions;
+using System.Net.Http.Headers;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
+using Volunteer_Corner.Business.Exceptions;
 using Volunteer_Corner.Business.Infrastructure.Expressions;
 using Volunteer_Corner.Business.Interfaces;
 using Volunteer_Corner.Business.Models.Requests;
 using Volunteer_Corner.Business.Models.Results.HelpRequests;
 using Volunteer_Corner.Data.Entities;
+using Volunteer_Corner.Data.Enums;
 using Volunteer_Corner.Data.Interfaces;
 
 namespace Volunteer_Corner.Business.Services;
@@ -12,12 +16,14 @@ namespace Volunteer_Corner.Business.Services;
 public class HelpRequestService : IHelpRequestService
 {
     private readonly IMapper _mapper;
-    private readonly IRepository<HelpRequest> _helpRequestRepository;
+    private readonly IHelpRequestRepository _helpRequestRepository;
+    private readonly IRepository<HelpSeeker> _helpSeekerRepository;
 
-    public HelpRequestService(IRepository<HelpRequest> helpRequestRepository, IMapper mapper)
+    public HelpRequestService(IHelpRequestRepository helpRequestRepository, IMapper mapper, IRepository<HelpSeeker> helpSeekerRepository)
     {
         _helpRequestRepository = helpRequestRepository;
         _mapper = mapper;
+        _helpSeekerRepository = helpSeekerRepository;
     }
 
     public async Task<List<HelpRequestResult>> GetAllHelpRequests(GetAllHelpRequestsRequest request)
@@ -38,6 +44,60 @@ public class HelpRequestService : IHelpRequestService
         var source = await _helpRequestRepository.GetByIdAsync(requestId);
 
         var result = _mapper.Map<HelpRequest, HelpRequestResult>(source);
+        return result;
+    }
+
+    public async Task<HelpRequestResult> CreateAsync(CreateHelpRequestRequest request, IFormFileCollection files, string directoryToSave)
+    {
+        var owner = await _helpSeekerRepository.GetByIdAsync(request.OwnerId);
+
+        if (owner == null)
+        {
+            throw new NotFoundException(nameof(owner), request.OwnerId);
+        }
+
+        var helpRequest = _mapper.Map<CreateHelpRequestRequest, HelpRequest>(request);
+        helpRequest.Status = HelpRequestStatus.Active;
+
+        if (files?.Any() == true)
+        {
+            helpRequest.AdditionalDocuments = new List<HelpRequestDocument>();
+            
+            foreach (var file in files)
+            {
+                var folderName = Path.Combine("Resources", "Documents", helpRequest.Id);
+                var pathToSave = Path.Combine(directoryToSave, folderName);
+
+                if (!Directory.Exists(pathToSave))
+                {
+                    var dirInfo = new DirectoryInfo(pathToSave);
+                    dirInfo.Create();
+                }
+                
+                if (file.Length > 0)
+                {
+                    var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
+                    var fullPath = Path.Combine(pathToSave, fileName);
+                    var dbPath = Path.Combine(folderName, fileName);
+                    
+                    await using (var stream = new FileStream(fullPath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+                    
+                    helpRequest.AdditionalDocuments.Add(new HelpRequestDocument()
+                    {
+                        FilePath = dbPath,
+                        HelpRequestId = helpRequest.Id,
+                    });
+                }
+            }
+        }
+
+        await _helpRequestRepository.AddAsync(helpRequest);
+
+        var result = _mapper.Map<HelpRequest, HelpRequestResult>(helpRequest);
+
         return result;
     }
 

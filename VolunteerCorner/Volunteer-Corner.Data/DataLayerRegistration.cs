@@ -25,6 +25,7 @@ public static class DataLayerRegistration
             .AddUserManager<UserManager<User>>();
 
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+        services.AddScoped<IHelpRequestRepository, HelpRequestRepository>();
 
         return services;
     }
