@@ -80,5 +80,56 @@ namespace Volunteer_Corner.DataTests.Repositories
             // Assert
             actualResult.Should().BeEquivalentTo(expectedResult);
         }
+
+        [Test]
+        public async Task GetAsync_WhenFilterAndIncludesAreApplied_ReturnDataAccordingToFilters()
+        {
+            // Arrange
+            Expression<Func<HelpRequest, bool>> predicate = x => x.Status == HelpRequestStatus.Active
+                                                                 && (x.Name.Contains("request 1"));
+            Func<IQueryable<HelpRequest>, IOrderedQueryable<HelpRequest>> orderBy = x => x.OrderByDescending(x => x.Id);
+
+            var includeString = new List<Expression<Func<HelpRequest, object>>>()
+            {
+                x => x.Owner
+            };
+
+            var query =  _dbContext.HelpRequests
+                .Where(predicate);
+
+            foreach (var include in includeString)
+                query = query.Include(include);
+
+            var expectedResult = query.AsNoTracking().ToList();
+
+            // Act
+            var actualResult = await _repository.GetAsync(predicate, includes: includeString);
+
+            // Assert
+            actualResult.Should().BeEquivalentTo(expectedResult);
+        }
+
+        [Test]
+        public async Task GetAsync_WhenFilterAndSequenceAreApplied_ReturnDataAccordingToFilters()
+        {
+            Expression<Func<HelpRequest, bool>> predicate = x => x.Status == HelpRequestStatus.Active
+                                                                 && (x.Name.Contains("request 1") || x.Name.Contains("request 3"));
+            Func<IQueryable<HelpRequest>, IOrderedQueryable<HelpRequest>> orderBy = x => x.OrderByDescending(x => x.OwnerId);
+
+            var includeString = "Owner";
+
+            var expectedResult = await _dbContext.HelpRequests
+                .Where(predicate)
+                .Include(includeString)
+                .AsNoTracking()
+                .OrderByDescending( x => x.OwnerId)
+                .ToListAsync();
+
+            // Act
+            var actualResult = await _repository.GetAsync(predicate, orderBy, includeString);
+
+            // Assert
+            actualResult.Should().BeEquivalentTo(expectedResult);
+        }
     }
 }
