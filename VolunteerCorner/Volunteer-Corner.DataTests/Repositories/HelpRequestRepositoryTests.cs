@@ -209,7 +209,7 @@ namespace Volunteer_Corner.DataTests.Repositories
             
             // Act
             await _repository.UpdateAsync(expectedResult);
-            var actualResult = await _repository.GetByIdAsync("3");
+            var actualResult = await _repository.GetByIdAsync(expectedResult.Id);
 
             // Assert
             actualResult.Should().BeEquivalentTo(expectedResult);
