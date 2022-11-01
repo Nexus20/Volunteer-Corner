@@ -87,7 +87,6 @@ namespace Volunteer_Corner.DataTests.Repositories
             // Arrange
             Expression<Func<HelpRequest, bool>> predicate = x => x.Status == HelpRequestStatus.Active
                                                                  && (x.Name.Contains("request 1"));
-            Func<IQueryable<HelpRequest>, IOrderedQueryable<HelpRequest>> orderBy = x => x.OrderByDescending(x => x.Id);
 
             var includeString = new List<Expression<Func<HelpRequest, object>>>()
             {
@@ -106,7 +105,7 @@ namespace Volunteer_Corner.DataTests.Repositories
             var actualResult = await _repository.GetAsync(predicate, includes: includeString);
 
             // Assert
-            actualResult.Should().BeEquivalentTo(expectedResult);
+            actualResult.Should().BeEquivalentTo(expectedResult, o => o.IgnoringCyclicReferences());
         }
 
         [Test]
@@ -130,7 +129,7 @@ namespace Volunteer_Corner.DataTests.Repositories
             var actualResult = await _repository.GetAsync(predicate, orderBy, includeString);
 
             // Assert
-            actualResult.Should().BeEquivalentTo(expectedResult);
+            actualResult.Should().BeEquivalentTo(expectedResult, o => o.IgnoringCyclicReferences());
         }
 
         [Test]
