@@ -153,7 +153,6 @@ namespace Volunteer_Corner.DataTests.Repositories
         public async Task AddAsync_WhenOwnerAddNewHelpRequest_NumberOfRequestsIncreasesByOne()
         {
             // Arrange
-
             var newHelpRequest = new HelpRequest()
             {
                 Id = "4",
@@ -163,19 +162,15 @@ namespace Volunteer_Corner.DataTests.Repositories
                 OwnerId = "3"
             };
 
-            await _dbContext.AddAsync(newHelpRequest);
-            await _dbContext.SaveChangesAsync();
-
-            Expression<Func<HelpRequest, bool>> predicate = x => x.Status == HelpRequestStatus.Active;
-
-            var expectedResult  =  _dbContext.HelpRequests.Where(predicate).ToListAsync().Result;
+            var expectedCount = await _dbContext.HelpRequests.CountAsync() + 1;
 
             // Act
-            _repository.AddAsync(newHelpRequest);
-            var actualResult =  _repository.GetAsync(predicate).Result;
+            var actualResult = await _repository.AddAsync(newHelpRequest);
+            var actualCount = await _dbContext.HelpRequests.CountAsync();
 
             // Assert
-            actualResult.Should().BeEquivalentTo(expectedResult);
+            actualCount.Should().Be(expectedCount);
+            newHelpRequest.Should().BeEquivalentTo(actualResult);
         }
 
         [Test]
@@ -183,24 +178,19 @@ namespace Volunteer_Corner.DataTests.Repositories
         {
             // Arrange
 
-            var HelpRequest = new HelpRequest()
+            var helpRequest = new HelpRequest()
             {
                 Id = "3"
             };
 
-            _dbContext.Remove(HelpRequest);
-            await _dbContext.SaveChangesAsync();
-
-            Expression<Func<HelpRequest, bool>> predicate = x => x.Status == HelpRequestStatus.Active;
-
-            var expectedResult = _dbContext.HelpRequests.Where(predicate).ToListAsync().Result;
+            var expectedCount = await _dbContext.HelpRequests.CountAsync() - 1;
 
             // Act
-            _repository.DeleteAsync(HelpRequest);
-            var actualResult = _repository.GetAsync(predicate).Result;
+            await _repository.DeleteAsync(helpRequest);
+            var actualCount = await _dbContext.HelpRequests.CountAsync();
 
             // Assert
-            actualResult.Should().BeEquivalentTo(expectedResult);
+            actualCount.Should().Be(expectedCount);
         }
 
         [Test]
