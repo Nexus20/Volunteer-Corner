@@ -5,6 +5,7 @@ using AutoMapper;
 using Castle.Core.Logging;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -189,8 +190,14 @@ namespace Volunteer_Corner.BusinessTests.Services
         {
             // Arrange
 
+            var formFiles = new FormFileCollection
+            {
+                UnitTestsHelper.GetMockFormFile("file", "file1.txt")
+            };
+
             var helpRequest = new CreateHelpRequestRequest()
             {
+                
                 OwnerId = "3",
                 Name = "Leha",
                 Description = "Nunya"
@@ -210,11 +217,9 @@ namespace Volunteer_Corner.BusinessTests.Services
 
             var expectedResult = _mapper.Map<HelpRequest, HelpRequestResult>(temporaryResult);
 
-          
-
             // Act
 
-            var action = await _helpRequestService.CreateAsync(helpRequest, _formFileCollection.Object, directory);
+            var action = await _helpRequestService.CreateAsync(helpRequest, formFiles, directory);
 
             // Assert
             action.Should().BeEquivalentTo(expectedResult);
