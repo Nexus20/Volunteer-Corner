@@ -1,228 +1,218 @@
 ﻿using System.Linq.Expressions;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using AutoMapper;
-using Castle.Core.Logging;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using Volunteer_Corner.Business.Exceptions;
-using Volunteer_Corner.Business.Infrastructure;
 using Volunteer_Corner.Business.Interfaces;
 using Volunteer_Corner.Business.Models.Requests;
 using Volunteer_Corner.Business.Models.Results.HelpRequests;
 using Volunteer_Corner.Business.Services;
-using Volunteer_Corner.Data;
 using Volunteer_Corner.Data.Entities;
-using Volunteer_Corner.Data.Entities.Identity;
 using Volunteer_Corner.Data.Enums;
 using Volunteer_Corner.Data.Interfaces;
 using Volunteer_Corner.Data.Repositories;
 
-namespace Volunteer_Corner.BusinessTests.Services
+namespace Volunteer_Corner.BusinessTests.Services;
+
+[TestFixture]
+public class HelpRequestServiceTests
 {
-    [TestFixture]
-    public class HelpRequestServiceTests
+    private IMapper _mapper = null!;
+    private Mock<IHelpRequestRepository> _helpRequestRepository = null!;
+    private Mock<IRepository<HelpSeeker>> _helpSeekerRepository = null!;
+    private Mock<IFormFileCollection> _formFileCollection = null!;
+    private IHelpRequestService _helpRequestService = null!;
+
+
+    [OneTimeSetUp]
+    public void OneTimeSetUp()
     {
-        private IMapper _mapper = null!;
-        private Mock<ILogger<HelpRequestRepository>> _mockedLogger = null!;
-        private Mock<IHelpRequestRepository> _helpRequestRepository = null!;
-        private Mock<IRepository<HelpSeeker>> _helpSeekerRepository = null!;
-        private Mock<IFormFileCollection> _formFileCollection = null!;
-        private IHelpRequestService _helpRequestService = null!;
+        // This method is called BEFORE ANY OF THE tests will be launched
+        // Do common initializing stuff
+        _mapper = UnitTestsHelper.GetMapper();
+    }
+
+    [SetUp]
+    public void SetUp()
+    {
+        // This method is called BEFORE EACH OF THE tests will be launched
+        // Do initializing stuff that needs to be applied before each test
+        new Mock<ILogger<HelpRequestRepository>>();
+        _helpSeekerRepository = new Mock<IRepository<HelpSeeker>>();
+        _helpRequestRepository = new Mock<IHelpRequestRepository>();
+        _formFileCollection = new Mock<IFormFileCollection>();
+        _helpRequestService =
+            new HelpRequestService(_helpRequestRepository.Object, _mapper, _helpSeekerRepository.Object);
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        // This method is called AFTER EVERY test had been launched
+        // Do all stuff that needs to be applied after unit tests will end its work 
+    }
+
+    [OneTimeTearDown]
+    public void OneTimeTearDown()
+    {
+        // This method is called AFTER ANY OF THE tests had been launched
+        // Do all stuff that needs to be applied after unit tests will end its work 
+    }
 
 
-        [OneTimeSetUp]
-        public void OneTimeSetUp()
+    // Please use Triple A convention (Arrange, Act, Assert)
+    // Naming convention
+    // <MethodName>_<WhenSomeActionOccurs>_<DoSomeExpectedResult>
+
+
+    [Test]
+    public async Task GetAllHelpRequests_WhenSearchingByUserRequest_ReturnsDataAccordingToRequest()
+    {
+        // Arrange
+
+        var request = new GetAllHelpRequestsRequest
         {
-            // This method is called BEFORE ANY OF THE tests will be launched
-            // Do common initializing stuff
-            _mapper = UnitTestsHelper.GetMapper();
-          
-        }
+            SearchString = "",
+            Status = HelpRequestStatus.Active,
+            StartDate = null,
+            EndDate = null
+        };
 
-        [SetUp]
-        public void SetUp()
+        var source = new List<HelpRequest>()
         {
-            // This method is called BEFORE EACH OF THE tests will be launched
-            // Do initializing stuff that needs to be applied before each test
-            _mockedLogger = new Mock<ILogger<HelpRequestRepository>>();
-            _helpSeekerRepository = new Mock<IRepository<HelpSeeker>>();
-            _helpRequestRepository = new Mock<IHelpRequestRepository>();
-            _formFileCollection = new Mock<IFormFileCollection>();
-            _helpRequestService = new HelpRequestService(_helpRequestRepository.Object, _mapper, _helpSeekerRepository.Object);
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            // This method is called AFTER EVERY test had been launched
-            // Do all stuff that needs to be applied after unit tests will end its work 
-
-        }
-
-        [OneTimeTearDown]
-        public void OneTimeTearDown()
-        {
-            // This method is called AFTER ANY OF THE tests had been launched
-            // Do all stuff that needs to be applied after unit tests will end its work 
-        }
-
-
-        // Please use Triple A convention (Arrange, Act, Assert)
-        // Naming convention
-        // <MethodName>_<WhenSomeActionOccurs>_<DoSomeExpectedResult>
-
-
-        [Test]
-        public async Task GetAllHelpRequests_WhenSearchingByUserRequest_ReturnsDataAccordingToRequest()
-        {
-            // Arrange
-
-            var request = new GetAllHelpRequestsRequest
+            new HelpRequest()
             {
-                SearchString = "",
-                Status = HelpRequestStatus.Active,
-                StartDate = null,
-                EndDate = null
-            };
-
-            var source = new List<HelpRequest>()
+                Id = "1",
+                OwnerId = "1",
+                Name = "Name 2",
+                Description = "Description 2",
+                Status = HelpRequestStatus.Active
+            },
+            new HelpRequest()
             {
-                new HelpRequest()
-                {
-                    Id = "1",
-                    OwnerId = "1",
-                    Name = "Name 2",
-                    Description = "Description 2",
-                    Status = HelpRequestStatus.Active
-                },
-                new HelpRequest()
-                {
-                    Id = "2",
-                    OwnerId = "2",
-                    Name = "Name 2",
-                    Description = "Description 2",
-                    Status = HelpRequestStatus.Closed
-                }   
-            };
+                Id = "2",
+                OwnerId = "2",
+                Name = "Name 2",
+                Description = "Description 2",
+                Status = HelpRequestStatus.Closed
+            }
+        };
 
-            _helpRequestRepository.Setup(m => m.GetAsync(
-                It.IsAny<Expression<Func<HelpRequest, bool>>?>(), 
-                It.IsAny<Func<IQueryable<HelpRequest>, IOrderedQueryable<HelpRequest>>?>(),
-                It.IsAny<List<Expression<Func<HelpRequest, object>>>?>(),
-                It.IsAny<bool>())).ReturnsAsync(source);
+        _helpRequestRepository.Setup(m => m.GetAsync(
+            It.IsAny<Expression<Func<HelpRequest, bool>>?>(),
+            It.IsAny<Func<IQueryable<HelpRequest>, IOrderedQueryable<HelpRequest>>?>(),
+            It.IsAny<List<Expression<Func<HelpRequest, object>>>?>(),
+            It.IsAny<bool>())).ReturnsAsync(source);
 
-            var expectedResult = _mapper.Map<List<HelpRequest>, List<HelpRequestResult>>(source);
+        var expectedResult = _mapper.Map<List<HelpRequest>, List<HelpRequestResult>>(source);
 
-            // Act
-            var action = await _helpRequestService.GetAllHelpRequests(request);
+        // Act
+        var action = await _helpRequestService.GetAllHelpRequests(request);
 
-            // Assert
-            action.Should().NotBeNull();
-            action.Should().BeEquivalentTo(expectedResult);
-        }
+        // Assert
+        action.Should().NotBeNull();
+        action.Should().BeEquivalentTo(expectedResult);
+    }
 
-        [Test]
-        public async Task GetHelpRequestById_WhenSearchingById_ReturnsDataAccordingToRequest()
+    [Test]
+    public async Task GetHelpRequestById_WhenSearchingById_ReturnsDataAccordingToRequest()
+    {
+        // Arrange
+
+        var requestId = "3";
+
+        var helpRequest = new HelpRequest()
         {
-            // Arrange
+            Id = "3",
+            OwnerId = "3",
+            Name = "Leha",
+            Description = "Nunya"
+        };
 
-            var requestId = "3";
-
-            var helpRequest = new HelpRequest()
-            {
-                Id = "3",
-                OwnerId = "3",
-                Name = "Leha",
-                Description = "Nunya"
-            };
-
-            _helpRequestRepository.Setup(m => m.GetByIdAsync(It.IsAny<string>())).ReturnsAsync(helpRequest);
+        _helpRequestRepository.Setup(m => m.GetByIdAsync(It.IsAny<string>())).ReturnsAsync(helpRequest);
 
 
-            var expectedResult = _mapper.Map<HelpRequest, HelpRequestResult>(helpRequest);
+        var expectedResult = _mapper.Map<HelpRequest, HelpRequestResult>(helpRequest);
 
-            // Act
-            var action = await _helpRequestService.GetHelpRequestById(requestId);
+        // Act
+        var action = await _helpRequestService.GetHelpRequestById(requestId);
 
-            // Assert
-            action.Should().BeEquivalentTo(expectedResult);
-        }
+        // Assert
+        action.Should().BeEquivalentTo(expectedResult);
+    }
 
-        [Test]
-        public async Task CreateAsync_WhenOwnerIsNotFound_ThrowsNotFoundException()
+    [Test]
+    public async Task CreateAsync_WhenOwnerIsNotFound_ThrowsNotFoundException()
+    {
+        // Arrange
+
+        var helpRequest = new CreateHelpRequestRequest()
         {
-            // Arrange
+            OwnerId = "3",
+            Name = "Leha",
+            Description = "Nunya"
+        };
 
-            var helpRequest = new CreateHelpRequestRequest()
-            {
-                OwnerId = "3",
-                Name = "Leha",
-                Description = "Nunya"
-            };
+        const string directory = "directory";
 
-            string directory = "directory";
+        var owner = new HelpRequest();
 
-            var owner = new HelpRequest();
+        _helpRequestRepository.Setup(m => m.GetByIdAsync(It.IsAny<string>())).ReturnsAsync(owner);
 
-            _helpRequestRepository.Setup(m => m.GetByIdAsync(It.IsAny<string>())).ReturnsAsync(owner);
+        var expectedResult = $"Entity \"{nameof(owner)}\" ({helpRequest.OwnerId}) was not found.";
 
-            var expectedResult = $"Entity \"{nameof(owner)}\" ({helpRequest.OwnerId}) was not found.";
+        // Act
 
-            // Act
-
-            var action = async () => { await _helpRequestService.CreateAsync(helpRequest, _formFileCollection.Object, directory); };
-
-            // Assert
-            await action.Should().ThrowAsync<NotFoundException>()
-                .WithMessage(expectedResult.ToString());
-
-        }
-
-        [Test]
-        public async Task CreateAsync_WhenOwnerIsCreatingRequest_ReturnsResultAccordingToRequest()
+        var action = async () =>
         {
-            // Arrange
+            await _helpRequestService.CreateAsync(helpRequest, _formFileCollection.Object, directory);
+        };
 
-            var formFiles = new FormFileCollection
-            {
-                UnitTestsHelper.GetMockFormFile("file", "file1.txt")
-            };
+        // Assert
+        await action.Should().ThrowAsync<NotFoundException>()
+            .WithMessage(expectedResult);
+    }
 
-            var helpRequest = new CreateHelpRequestRequest()
-            {
-                
-                OwnerId = "3",
-                Name = "Leha",
-                Description = "Nunya"
-            };
+    [Test]
+    public async Task CreateAsync_WhenOwnerIsCreatingRequest_ReturnsResultAccordingToRequest()
+    {
+        // Arrange
 
+        var formFiles = new FormFileCollection
+        {
+            UnitTestsHelper.GetMockFormFile("file", "file1.txt")
+        };
 
-            string directory = "directory";
+        var helpRequest = new CreateHelpRequestRequest()
+        {
+            OwnerId = "3",
+            Name = "Leha",
+            Description = "Nunya"
+        };
 
-            var owner = new HelpSeeker()
-            {
-                Id = "3"
-            };
+        const string directory = "directory";
 
-            _helpSeekerRepository.Setup(m => m.GetByIdAsync(It.IsAny<string>())).ReturnsAsync(owner);
+        var owner = new HelpSeeker()
+        {
+            Id = "3"
+        };
 
-            var temporaryResult = _mapper.Map<CreateHelpRequestRequest, HelpRequest>(helpRequest);
+        _helpSeekerRepository.Setup(m => m.GetByIdAsync(It.IsAny<string>())).ReturnsAsync(owner);
 
-            var expectedResult = _mapper.Map<HelpRequest, HelpRequestResult>(temporaryResult);
+        var temporaryResult = _mapper.Map<CreateHelpRequestRequest, HelpRequest>(helpRequest);
+        temporaryResult.Status = HelpRequestStatus.Active;
+        temporaryResult.Owner = owner;
+        var expectedResult = _mapper.Map<HelpRequest, HelpRequestResult>(temporaryResult);
 
-            // Act
+        // Act
 
-            var action = await _helpRequestService.CreateAsync(helpRequest, formFiles, directory);
+        var actualResult = await _helpRequestService.CreateAsync(helpRequest, formFiles, directory);
 
-            // Assert
-            action.Should().BeEquivalentTo(expectedResult);
-        }
+        // Assert
+        actualResult.Should().BeEquivalentTo(expectedResult, o => o.Excluding(x => x.Id));
     }
 }
