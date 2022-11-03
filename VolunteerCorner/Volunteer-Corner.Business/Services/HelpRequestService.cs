@@ -43,6 +43,9 @@ public class HelpRequestService : IHelpRequestService
     {
         var source = await _helpRequestRepository.GetByIdAsync(requestId);
 
+        if (source == null)
+            throw new NotFoundException(nameof(HelpRequest), requestId);
+        
         var result = _mapper.Map<HelpRequest, HelpRequestResult>(source);
         return result;
     }
@@ -57,6 +60,7 @@ public class HelpRequestService : IHelpRequestService
         }
 
         var helpRequest = _mapper.Map<CreateHelpRequestRequest, HelpRequest>(request);
+        helpRequest.Owner = owner;
         helpRequest.Status = HelpRequestStatus.Active;
 
         if (files?.Any() == true)

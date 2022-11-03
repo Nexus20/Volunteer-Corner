@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -12,6 +13,15 @@ namespace Volunteer_Corner.BusinessTests;
 
 internal static class UnitTestsHelper
 {
+
+    public static IFormFile GetMockFormFile(string modelName, string filename)
+    {
+        var formFile = new Mock<IFormFile>();
+        formFile.Setup(f => f.Name).Returns(modelName);
+        formFile.Setup(f => f.FileName).Returns(filename);
+
+        return formFile.Object;
+    }
     public static IConfiguration GetConfiguration()
     {
         // Add here needed configuration to mock appsettings.json file
@@ -59,5 +69,6 @@ internal static class UnitTestsHelper
     private static void SeedData(ApplicationDbContext context)
     {
         // Seed the needed data here into inMemory Db context
+       
     }
 }
