@@ -71,6 +71,8 @@ builder.Services.AddAuthentication(opt =>
     });
 builder.Services.AddAuthorization();
 
+builder.Services.AddCors(o =>
+    o.AddPolicy("AllowAll", b => b.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
 
 builder.Services.AddBusinessLayer(builder.Configuration);
 // Add services to the container.
@@ -117,6 +119,7 @@ if (app.Environment.IsDevelopment()) {
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowAll");
 app.UseRouting();
 
 app.UseStaticFiles();
