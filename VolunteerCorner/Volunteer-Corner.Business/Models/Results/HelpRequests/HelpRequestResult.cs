@@ -7,6 +7,7 @@ public class HelpRequestResult : BaseResult
 {
     public HelpSeekerResult Owner { get; set; }
     public string Name { get; set; } = null!;
+    public string Location { get; set; } = null!;
     public string? Description { get; set; }
     public HelpRequestStatus Status { get; set; }
     public List<HelpRequestDocumentResult>? AdditionalDocuments { get; set; }
