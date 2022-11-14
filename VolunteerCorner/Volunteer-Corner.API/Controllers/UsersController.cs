@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Volunteer_Corner.Business.Interfaces;
@@ -7,7 +8,7 @@ using Volunteer_Corner.Business.Models.Results;
 namespace Volunteer_Corner.API.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     public class UsersController : ControllerBase
     {
