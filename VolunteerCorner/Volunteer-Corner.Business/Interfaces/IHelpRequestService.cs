@@ -10,5 +10,5 @@ public interface IHelpRequestService
     Task<HelpRequestResult> GetHelpRequestById(string requestId);
     Task<HelpRequestResult> CreateAsync(CreateHelpRequestRequest request, IFormFileCollection files, string directoryToSave);
     Task<HelpRequestResult> UpdateAsync(int id, string value);
-    Task<HelpRequestResult> UpdateAsync(CreateHelpRequestRequest request, IFormFileCollection files, string directoryToSave);
+    Task<HelpRequestResult> UpdateAsync(UpdateHelpRequestRequest request, IFormFileCollection files, string directoryToSave);
 }

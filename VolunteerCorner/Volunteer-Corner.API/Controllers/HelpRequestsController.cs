@@ -47,20 +47,20 @@ namespace Volunteer_Corner.API.Controllers
             return StatusCode(StatusCodes.Status201Created, result);
         }
 
-        // PUT: api/HelpRequests/5
-        [HttpPut("{id}")]
-        [ProducesResponseType(typeof(HelpRequestResult), StatusCodes.Status201Created)]
-        public async Task<IActionResult> Put(int id, [FromBody] string value)
+        // Patch: api/HelpRequests/5
+        [HttpPatch("{id}")]
+        [ProducesResponseType(typeof(HelpRequestResult), StatusCodes.Status200OK)]
+        public async Task<IActionResult> Patch(int id, [FromBody] string value)
         {
             var result = await _helpRequestService.UpdateAsync(id, value);
 
-            return StatusCode(StatusCodes.Status201Created, result);
+            return StatusCode(StatusCodes.Status200OK, result);
         }
 
         // PUT: api/HelpRequests
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(HelpRequestResult), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Put([FromForm] CreateHelpRequestRequest request)
+        public async Task<IActionResult> Put([FromForm] UpdateHelpRequestRequest request)
         {
             var result = await _helpRequestService.UpdateAsync(request, Request.Form.Files, Directory.GetCurrentDirectory());
 
