@@ -47,10 +47,14 @@ namespace Volunteer_Corner.API.Controllers
             return StatusCode(StatusCodes.Status201Created, result);
         }
 
-        // PUT: api/HelpRequests/5
+        // PUT: api/HelpRequests
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [ProducesResponseType(typeof(HelpRequestResult), StatusCodes.Status200OK)]
+        public async Task<IActionResult> Put([FromForm] CreateHelpRequestRequest request)
         {
+            var result = await _helpRequestService.Put(request, Request.Form.Files, Directory.GetCurrentDirectory());
+
+            return StatusCode(StatusCodes.Status200OK, result);
         }
 
         // DELETE: api/HelpRequests/5
