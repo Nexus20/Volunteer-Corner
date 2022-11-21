@@ -39,5 +39,14 @@ namespace Volunteer_Corner.API.Controllers
             var result = await _signInService.SignInAsync(request);
             return result.IsAuthSuccessful ? Ok(result) : Unauthorized(result);
         }
+
+        [HttpPost("[action]")]
+        [AllowAnonymous]
+        [ProducesResponseType(typeof(RegisterResult), StatusCodes.Status200OK)]
+        public async Task<IActionResult> Edit([FromBody] UpdateRequest request)
+        {
+            var result = await _userService.EditAsync(request);
+            return StatusCode(StatusCodes.Status200OK, result);
+        }
     }
 }
