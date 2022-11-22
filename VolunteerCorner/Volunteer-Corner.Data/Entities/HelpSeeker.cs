@@ -6,6 +6,6 @@ namespace Volunteer_Corner.Data.Entities;
 public class HelpSeeker : BaseEntity
 {
     public string UserId { get; set; } = null!;
-    public User User { get; set; } = null!;
-    public List<HelpRequest>? HelpRequests { get; set; }
+    public virtual User User { get; set; } = null!;
+    public virtual List<HelpRequest>? HelpRequests { get; set; }
 }

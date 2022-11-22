@@ -14,7 +14,7 @@ public static class DataLayerRegistration
     public static IServiceCollection AddDataLayer(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            options.UseLazyLoadingProxies().UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
         
         services.AddIdentity<User, Role>()
             .AddUserStore<UserStore<User, Role, ApplicationDbContext, string, IdentityUserClaim<string>, UserRole,

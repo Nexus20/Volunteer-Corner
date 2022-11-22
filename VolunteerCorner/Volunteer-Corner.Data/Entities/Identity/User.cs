@@ -7,10 +7,10 @@ public class User : IdentityUser
     public string FirstName { get; set; } = null!;
     public string LastName { get; set; } = null!;
     public string? Patronymic { get; set; }
-    public List<UserRole> UserRoles { get; set; }
+    public virtual List<UserRole> UserRoles { get; set; }
     
-    public HelpSeeker? HelpSeeker { get; set; }
-    public Volunteer? Volunteer { get; set; }
+    public virtual HelpSeeker? HelpSeeker { get; set; }
+    public virtual Volunteer? Volunteer { get; set; }
 
-    public List<UserDocument>? Documents { get; set; }
+    public virtual List<UserDocument>? Documents { get; set; }
 }

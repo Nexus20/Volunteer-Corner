@@ -8,5 +8,5 @@ public class Role : IdentityRole
 
     public Role(string roleName) : base(roleName) { }
     
-    public List<UserRole> UserRoles { get; set; }
+    public virtual List<UserRole> UserRoles { get; set; }
 }

@@ -38,6 +38,12 @@ public class JwtHandler {
             claims.Add(new Claim(ClaimTypes.Role, role));
         }
         
+        if(user.HelpSeeker != null)
+            claims.Add(new Claim(CustomClaimTypes.HelpSeekerId, user.HelpSeeker.Id));
+        
+        if(user.Volunteer != null)
+            claims.Add(new Claim(CustomClaimTypes.VolunteerId, user.Volunteer.Id));
+        
         return claims;
     }
     

@@ -45,7 +45,12 @@ namespace Volunteer_Corner.API.Controllers
         [ProducesResponseType(typeof(HelpRequestResult), StatusCodes.Status201Created)]
         public async Task<IActionResult> Post([FromForm] CreateHelpRequestRequest request)
         {
-            var result = await _helpRequestService.CreateAsync(request,  Request.Form.Files, Directory.GetCurrentDirectory());
+            var helpRequestOwnerId = User.FindFirstValue(CustomClaimTypes.HelpSeekerId);
+            
+            if (string.IsNullOrWhiteSpace(helpRequestOwnerId))
+                return Forbid();
+
+            var result = await _helpRequestService.CreateAsync(request, helpRequestOwnerId, Request.Form.Files, Directory.GetCurrentDirectory());
 
             return StatusCode(StatusCodes.Status201Created, result);
         }

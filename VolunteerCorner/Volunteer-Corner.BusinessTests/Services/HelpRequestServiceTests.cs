@@ -149,9 +149,9 @@ public class HelpRequestServiceTests
     public async Task CreateAsync_WhenOwnerIsNotFound_ThrowsNotFoundException()
     {
         // Arrange
+        const string helpRequestOwnerId = "3";
         var helpRequest = new CreateHelpRequestRequest()
         {
-            OwnerId = "3",
             Name = "Leha",
             Description = "Nunya"
         };
@@ -162,13 +162,13 @@ public class HelpRequestServiceTests
 
         _helpRequestRepository.Setup(m => m.GetByIdAsync(It.IsAny<string>())).ReturnsAsync(owner);
 
-        var expectedResult = $"Entity \"{nameof(HelpSeeker)}\" ({helpRequest.OwnerId}) was not found.";
+        var expectedResult = $"Entity \"{nameof(HelpSeeker)}\" ({helpRequestOwnerId}) was not found.";
 
         // Act
 
         var action = async () =>
         {
-            await _helpRequestService.CreateAsync(helpRequest, _formFileCollection.Object, directory);
+            await _helpRequestService.CreateAsync(helpRequest, helpRequestOwnerId, _formFileCollection.Object, directory);
         };
 
         // Assert
@@ -186,9 +186,9 @@ public class HelpRequestServiceTests
             UnitTestsHelper.GetMockFormFile("file", "file1.txt")
         };
         
+        const string helpRequestOwnerId = "3";
         var helpRequest = new CreateHelpRequestRequest()
         {
-            OwnerId = "3",
             Name = "Leha",
             Description = "Nunya"
         };
@@ -209,7 +209,7 @@ public class HelpRequestServiceTests
 
         // Act
 
-        var actualResult = await _helpRequestService.CreateAsync(helpRequest, formFiles, directory);
+        var actualResult = await _helpRequestService.CreateAsync(helpRequest, helpRequestOwnerId, formFiles, directory);
 
         // Assert
         actualResult.Should().BeEquivalentTo(expectedResult, o => o.Excluding(x => x.Id));

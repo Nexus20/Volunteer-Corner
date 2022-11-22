@@ -106,14 +106,14 @@ public class HelpRequestService : IHelpRequestService
         return result;
     }
     
-    public async Task<HelpRequestResult> CreateAsync(CreateHelpRequestRequest request,
+    public async Task<HelpRequestResult> CreateAsync(CreateHelpRequestRequest request, string helpRequestOwnerId,
         IFormFileCollection files, string directoryToSave)
     {
-        var owner = await _helpSeekerRepository.GetByIdAsync(request.OwnerId);
+        var owner = await _helpSeekerRepository.GetByIdAsync(helpRequestOwnerId);
 
         if (owner == null)
         {
-            throw new NotFoundException(nameof(HelpSeeker), request.OwnerId);
+            throw new NotFoundException(nameof(HelpSeeker), helpRequestOwnerId);
         }
 
         var helpRequest = _mapper.Map<CreateHelpRequestRequest, HelpRequest>(request);
@@ -156,7 +156,7 @@ public class HelpRequestService : IHelpRequestService
         }
 
         await _helpRequestRepository.AddAsync(helpRequest);
-        helpRequest.Owner = owner;
+        
         var result = _mapper.Map<HelpRequest, HelpRequestResult>(helpRequest);
 
         return result;
