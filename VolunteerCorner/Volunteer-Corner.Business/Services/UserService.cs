@@ -87,4 +87,9 @@ public class UserService : IUserService
         var result = _mapper.Map<User, RegisterResult>(user);
         return result;
     }
+
+    public Task<RegisterResult> EditAsync(UpdateRequest request)
+    {
+        throw new NotImplementedException();
+    }
 }

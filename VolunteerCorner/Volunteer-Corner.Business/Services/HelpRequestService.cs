@@ -2,6 +2,7 @@
 using System.Net.Http.Headers;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Volunteer_Corner.Business.Exceptions;
 using Volunteer_Corner.Business.Infrastructure.Expressions;
 using Volunteer_Corner.Business.Interfaces;
@@ -18,12 +19,14 @@ public class HelpRequestService : IHelpRequestService
     private readonly IMapper _mapper;
     private readonly IHelpRequestRepository _helpRequestRepository;
     private readonly IRepository<HelpSeeker> _helpSeekerRepository;
+    private readonly ILogger<HelpRequestService> _logger;
 
-    public HelpRequestService(IHelpRequestRepository helpRequestRepository, IMapper mapper, IRepository<HelpSeeker> helpSeekerRepository)
+    public HelpRequestService(IHelpRequestRepository helpRequestRepository, IMapper mapper, IRepository<HelpSeeker> helpSeekerRepository, ILogger<HelpRequestService> logger)
     {
         _helpRequestRepository = helpRequestRepository;
         _mapper = mapper;
         _helpSeekerRepository = helpSeekerRepository;
+        _logger = logger;
     }
 
     public async Task<List<HelpRequestResult>> GetAllHelpRequests(GetAllHelpRequestsRequest request)
@@ -49,14 +52,68 @@ public class HelpRequestService : IHelpRequestService
         var result = _mapper.Map<HelpRequest, HelpRequestResult>(source);
         return result;
     }
+    
+    public async Task<HelpRequestResult> UpdateAsync(string id, UpdateHelpRequestRequest request, IFormFileCollection files,
+        string directoryToSave)
+    {
+        var helpRequestToUpdate = await _helpRequestRepository.GetByIdAsync(id);
 
-    public async Task<HelpRequestResult> CreateAsync(CreateHelpRequestRequest request, IFormFileCollection files, string directoryToSave)
+        if (helpRequestToUpdate == null)
+            throw new NotFoundException(nameof(HelpRequest), id);
+
+        _mapper.Map<UpdateHelpRequestRequest, HelpRequest>(request, helpRequestToUpdate);
+
+        if (files?.Any() == true)
+        {
+            if (helpRequestToUpdate.AdditionalDocuments?.Any() == false)
+            {
+                helpRequestToUpdate.AdditionalDocuments = new List<HelpRequestDocument>();
+            }
+            
+            foreach (var file in files)
+            {
+                var folderName = Path.Combine("Resources", "Documents", helpRequestToUpdate.Id);
+                var pathToSave = Path.Combine(directoryToSave, folderName);
+
+                if (!Directory.Exists(pathToSave))
+                {
+                    var dirInfo = new DirectoryInfo(pathToSave);
+                    dirInfo.Create();
+                }
+                
+                if (file.Length > 0)
+                {
+                    var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
+                    var fullPath = Path.Combine(pathToSave, fileName);
+                    var dbPath = Path.Combine(folderName, fileName);
+                    
+                    await using (var stream = new FileStream(fullPath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+                    
+                    helpRequestToUpdate.AdditionalDocuments.Add(new HelpRequestDocument()
+                    {
+                        FilePath = dbPath,
+                        HelpRequestId = helpRequestToUpdate.Id,
+                    });
+                }
+            }
+        }
+        
+        await _helpRequestRepository.UpdateAsync(helpRequestToUpdate);
+        var result = _mapper.Map<HelpRequest, HelpRequestResult>(helpRequestToUpdate);
+        return result;
+    }
+    
+    public async Task<HelpRequestResult> CreateAsync(CreateHelpRequestRequest request,
+        IFormFileCollection files, string directoryToSave)
     {
         var owner = await _helpSeekerRepository.GetByIdAsync(request.OwnerId);
 
         if (owner == null)
         {
-            throw new NotFoundException(nameof(owner), request.OwnerId);
+            throw new NotFoundException(nameof(HelpSeeker), request.OwnerId);
         }
 
         var helpRequest = _mapper.Map<CreateHelpRequestRequest, HelpRequest>(request);
@@ -99,10 +156,27 @@ public class HelpRequestService : IHelpRequestService
         }
 
         await _helpRequestRepository.AddAsync(helpRequest);
-
+        helpRequest.Owner = owner;
         var result = _mapper.Map<HelpRequest, HelpRequestResult>(helpRequest);
 
         return result;
+    }
+
+    public async Task<HelpRequestStatus> ChangeStatusAsync(string id, UpdateHelpRequestStatus request)
+    {
+        var helpRequestToUpdate = await _helpRequestRepository.GetByIdAsync(id);
+
+        if (helpRequestToUpdate == null)
+            throw new NotFoundException(nameof(HelpRequest), id);
+
+        if (helpRequestToUpdate.Status == HelpRequestStatus.Canceled && request.NewStatus == HelpRequestStatus.Closed)
+            throw new ValidationException("Canceled request can't be set to closed");
+        
+        helpRequestToUpdate.Status = request.NewStatus;
+
+        await _helpRequestRepository.UpdateAsync(helpRequestToUpdate);
+        _logger.LogInformation("Request #{RequestId} has been updated with new status: {RequestNewStatus}", id, request.NewStatus);
+        return request.NewStatus;
     }
 
     private Expression<Func<HelpRequest, bool>>? CreateFilterPredicate(GetAllHelpRequestsRequest request)

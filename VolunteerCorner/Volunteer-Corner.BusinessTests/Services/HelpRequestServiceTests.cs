@@ -46,7 +46,7 @@ public class HelpRequestServiceTests
         _helpRequestRepository = new Mock<IHelpRequestRepository>();
         _formFileCollection = new Mock<IFormFileCollection>();
         _helpRequestService =
-            new HelpRequestService(_helpRequestRepository.Object, _mapper, _helpSeekerRepository.Object);
+            new HelpRequestService(_helpRequestRepository.Object, _mapper, _helpSeekerRepository.Object, new Mock<ILogger<HelpRequestService>>().Object);
     }
 
     [TearDown]
@@ -149,7 +149,6 @@ public class HelpRequestServiceTests
     public async Task CreateAsync_WhenOwnerIsNotFound_ThrowsNotFoundException()
     {
         // Arrange
-
         var helpRequest = new CreateHelpRequestRequest()
         {
             OwnerId = "3",
@@ -163,7 +162,7 @@ public class HelpRequestServiceTests
 
         _helpRequestRepository.Setup(m => m.GetByIdAsync(It.IsAny<string>())).ReturnsAsync(owner);
 
-        var expectedResult = $"Entity \"{nameof(owner)}\" ({helpRequest.OwnerId}) was not found.";
+        var expectedResult = $"Entity \"{nameof(HelpSeeker)}\" ({helpRequest.OwnerId}) was not found.";
 
         // Act
 
@@ -186,7 +185,7 @@ public class HelpRequestServiceTests
         {
             UnitTestsHelper.GetMockFormFile("file", "file1.txt")
         };
-
+        
         var helpRequest = new CreateHelpRequestRequest()
         {
             OwnerId = "3",
