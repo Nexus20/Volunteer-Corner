@@ -24,5 +24,6 @@ public class AutomapperBusinessProfile : Profile
 
         CreateMap<HelpRequestDocument, HelpRequestDocumentResult>();
         CreateMap<CreateHelpRequestRequest, HelpRequest>();
+        CreateMap<UpdateHelpRequestRequest, HelpRequest>();
     }
 }
