@@ -12,7 +12,8 @@ public class AutomapperBusinessProfile : Profile
     public AutomapperBusinessProfile()
     {
         CreateMap<RegisterRequest, User>();
-        CreateMap<User, RegisterResult>();
+        CreateMap<UpdateOwnProfileRequest, User>();
+        CreateMap<User, UserResult>();
 
         CreateMap<HelpRequest, HelpRequestResult>();
         CreateMap<HelpSeeker, HelpSeekerResult>()

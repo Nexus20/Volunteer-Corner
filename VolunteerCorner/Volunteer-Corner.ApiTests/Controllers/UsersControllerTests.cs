@@ -39,7 +39,7 @@ public class UsersControllerTests
     public async Task Register_WhenUserRegisteredSuccessfully_ReturnsStatus201()
     {
         // Arrange
-        var expectedResult = new RegisterResult()
+        var expectedResult = new UserResult()
         {
             Id = "Some registered user id"
         };
