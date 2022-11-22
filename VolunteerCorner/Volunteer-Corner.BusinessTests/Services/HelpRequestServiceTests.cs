@@ -351,4 +351,88 @@ public class HelpRequestServiceTests
 
         actualResult.Should().Be(expectedResult);
     }
+
+    [Test]
+    public async Task UpdateAsync_WhenHelpRequestIsNotFound_ThrowNotFoundException()
+    {
+        // Arrange
+
+        var formFiles = new FormFileCollection
+        {
+            UnitTestsHelper.GetMockFormFile("file", "file1.txt")
+        };
+
+        var updateHelpRequestStatus = new UpdateHelpRequestRequest
+        {
+            Name = "Name",
+            Location = "Location",
+            Description = "Description"
+        };
+
+        const string helpRequestId = "3";
+
+        const string directory = "directory";
+
+        HelpRequest helpRequest = null;
+        _helpRequestRepository.Setup(m => m.GetByIdAsync(It.IsAny<string>())).ReturnsAsync(helpRequest);
+
+        var expectedResult = $"Entity \"HelpRequest\" ({helpRequestId}) was not found.";
+
+        // Act
+
+        var action = async () =>
+        {
+            await _helpRequestService.UpdateAsync(helpRequestId, updateHelpRequestStatus, formFiles, directory);
+        };
+
+        // Assert
+
+        await action.Should().ThrowAsync<NotFoundException>()
+            .WithMessage(expectedResult);
+    }
+
+    [Test]
+    public async Task UpdateAsync_WhenOwnerIsUpdatingRequest_ReturnsResultAccordingToRequest()
+    {
+        // Arrange
+
+        var formFiles = new FormFileCollection
+        {
+            UnitTestsHelper.GetMockFormFile("file", "file1.txt")
+        };
+
+        var updateHelpRequestStatus = new UpdateHelpRequestRequest
+        {
+            Name = "Name",
+            Location = "Location",
+            Description = "Description"
+        };
+
+        const string helpRequestId = "3";
+
+        const string directory = "directory";
+
+        var time = DateTime.Now;
+
+        var helpRequest = new HelpRequest()
+        {
+            Id = helpRequestId,
+            Status = HelpRequestStatus.Active,
+            CreatedDate = time
+        };
+
+        var temporaryResult = _mapper.Map<UpdateHelpRequestRequest, HelpRequest>(updateHelpRequestStatus, helpRequest);
+
+        var expectedResult = _mapper.Map<HelpRequest, HelpRequestResult>(temporaryResult);
+
+        _helpRequestRepository.Setup(m => m.GetByIdAsync(It.IsAny<string>())).ReturnsAsync(helpRequest);
+
+        // Act
+
+        var action = await _helpRequestService.UpdateAsync(helpRequestId, updateHelpRequestStatus, formFiles, directory);
+
+        // Assert
+
+        action.Should().BeEquivalentTo(expectedResult);
+    }
 }
