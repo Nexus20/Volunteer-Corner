@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +24,7 @@ namespace Volunteer_Corner.API.Controllers
 
         [HttpPost("[action]")]
         [AllowAnonymous]
-        [ProducesResponseType(typeof(RegisterResult), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(UserResult), StatusCodes.Status201Created)]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
             var result = await _userService.RegisterAsync(request);
@@ -40,13 +41,17 @@ namespace Volunteer_Corner.API.Controllers
             return result.IsAuthSuccessful ? Ok(result) : Unauthorized(result);
         }
 
-        [HttpPost("[action]")]
-        [AllowAnonymous]
-        [ProducesResponseType(typeof(RegisterResult), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Edit([FromBody] UpdateRequest request)
+        [HttpPut("[action]")]
+        [ProducesResponseType(typeof(UserResult), StatusCodes.Status200OK)]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateOwnProfileRequest updateOwnProfileRequest)
         {
-            var result = await _userService.EditAsync(request);
-            return StatusCode(StatusCodes.Status200OK, result);
+            var profileOwnerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrWhiteSpace(profileOwnerId))
+                return Forbid();
+            
+            var result = await _userService.UpdateOwnProfileAsync(profileOwnerId, updateOwnProfileRequest);
+            return Ok(result);
         }
     }
 }

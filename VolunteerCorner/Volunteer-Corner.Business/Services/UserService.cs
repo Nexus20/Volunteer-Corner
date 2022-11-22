@@ -28,7 +28,7 @@ public class UserService : IUserService
         _dbContext = dbContext;
     }
 
-    public async Task<RegisterResult> RegisterAsync(RegisterRequest request)
+    public async Task<UserResult> RegisterAsync(RegisterRequest request)
     {
         if (!Enum.IsDefined(request.AccountType))
             throw new ValidationException("Invalid account type");
@@ -84,12 +84,27 @@ public class UserService : IUserService
         
         _logger.LogInformation("User {UserId} has been successfully registered", user.Id);
 
-        var result = _mapper.Map<User, RegisterResult>(user);
+        var result = _mapper.Map<User, UserResult>(user);
         return result;
     }
 
-    public Task<RegisterResult> EditAsync(UpdateRequest request)
+    public async Task<UserResult> UpdateOwnProfileAsync(string profileOwnerId, UpdateOwnProfileRequest updateProfileRequest)
     {
-        throw new NotImplementedException();
+        var userToUpdate = await _userManager.FindByIdAsync(profileOwnerId);
+
+        if (userToUpdate == null)
+            throw new NotFoundException(nameof(User), profileOwnerId);
+
+        _mapper.Map<UpdateOwnProfileRequest, User>(updateProfileRequest, userToUpdate);
+
+        var identityResult = await _userManager.UpdateAsync(userToUpdate);
+        
+        if(identityResult.Errors.Any())
+            throw new IdentityException(identityResult.Errors);
+        
+        _logger.LogInformation("User {UserId} has been successfully updated", profileOwnerId);
+        
+        var result = _mapper.Map<User, UserResult>(userToUpdate);
+        return result;
     }
 }

@@ -5,6 +5,6 @@ namespace Volunteer_Corner.Business.Interfaces;
 
 public interface IUserService
 {
-    Task<RegisterResult> RegisterAsync(RegisterRequest request);
-    Task<RegisterResult> EditAsync(UpdateRequest request);
+    Task<UserResult> RegisterAsync(RegisterRequest request);
+    Task<UserResult> UpdateOwnProfileAsync(string profileOwnerId, UpdateOwnProfileRequest updateProfileRequest);
 }

@@ -238,7 +238,7 @@ public class UserServiceTests
 
         var user = _mapper.Map<RegisterRequest, User>(request);
 
-        var expectedResult = _mapper.Map<User, RegisterResult>(user);
+        var expectedResult = _mapper.Map<User, UserResult>(user);
 
         _mockedUserManager.Setup(m => m.CreateAsync(It.IsAny<User>(),
                 It.IsAny<string>()))
