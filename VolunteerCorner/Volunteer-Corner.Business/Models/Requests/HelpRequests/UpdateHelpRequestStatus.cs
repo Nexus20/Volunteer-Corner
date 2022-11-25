@@ -2,7 +2,7 @@
 using Volunteer_Corner.Business.Validation;
 using Volunteer_Corner.Data.Enums;
 
-namespace Volunteer_Corner.Business.Models.Requests;
+namespace Volunteer_Corner.Business.Models.Requests.HelpRequests;
 
 public class UpdateHelpRequestStatus
 {

@@ -2,7 +2,7 @@
 using Volunteer_Corner.Business.Models.Enums;
 using Volunteer_Corner.Business.Validation;
 
-namespace Volunteer_Corner.Business.Models.Requests;
+namespace Volunteer_Corner.Business.Models.Requests.Auth;
 
 public class RegisterRequest
 {

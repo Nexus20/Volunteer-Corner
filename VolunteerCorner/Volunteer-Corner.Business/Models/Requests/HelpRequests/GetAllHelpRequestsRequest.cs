@@ -1,6 +1,6 @@
 ﻿using Volunteer_Corner.Data.Enums;
 
-namespace Volunteer_Corner.Business.Models.Requests;
+namespace Volunteer_Corner.Business.Models.Requests.HelpRequests;
 
 public class GetAllHelpRequestsRequest
 {

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Volunteer_Corner.Business.Models.Requests;
+namespace Volunteer_Corner.Business.Models.Requests.Auth;
 
 public class LoginRequest {
     

@@ -1,4 +1,5 @@
 ﻿using Volunteer_Corner.Business.Models.Requests;
+using Volunteer_Corner.Business.Models.Requests.Auth;
 using Volunteer_Corner.Business.Models.Results;
 
 namespace Volunteer_Corner.Business.Interfaces;

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Volunteer_Corner.Business;
 using Volunteer_Corner.Business.Interfaces;
-using Volunteer_Corner.Business.Models.Requests;
+using Volunteer_Corner.Business.Models.Requests.HelpRequests;
 using Volunteer_Corner.Business.Models.Results.HelpRequests;
 
 namespace Volunteer_Corner.API.Controllers
@@ -70,11 +70,27 @@ namespace Volunteer_Corner.API.Controllers
         [HttpPut("{id}")]
         [Authorize(Roles = CustomRoles.HelpSeekerRole)]
         [ProducesResponseType(typeof(HelpRequestResult), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Put(string id, [FromForm] UpdateHelpRequestRequest request)
+        public async Task<IActionResult> Put(string id, [FromBody] UpdateHelpRequestRequest request)
         {
-            var result = await _helpRequestService.UpdateAsync(id, request, Request.Form.Files, Directory.GetCurrentDirectory());
-
+            var result = await _helpRequestService.UpdateAsync(id, request);
             return StatusCode(StatusCodes.Status200OK, result);
+        }
+        
+        [HttpPatch("{id}/[action]")]
+        public async Task<IActionResult> DeleteDocuments(string id, [FromBody] DeleteHelpRequestDocumentsRequest request)
+        {
+            await _helpRequestService.DeleteDocumentsAsync(id, request, Directory.GetCurrentDirectory());
+            return NoContent();
+        }
+        
+        [HttpPatch("{id}/[action]")]
+        public async Task<IActionResult> AddDocuments(string id)
+        {
+            if (!Request.Form.Files.Any())
+                return BadRequest();
+            
+            var result = await _helpRequestService.AddDocumentsAsync(id, Request.Form.Files, Directory.GetCurrentDirectory());
+            return Ok(result);
         }
 
         // DELETE: api/HelpRequests/5

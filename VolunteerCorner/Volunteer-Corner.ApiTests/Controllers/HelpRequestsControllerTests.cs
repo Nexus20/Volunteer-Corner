@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Volunteer_Corner.API.Controllers;
 using Volunteer_Corner.Business.Models.Requests;
+using Volunteer_Corner.Business.Models.Requests.HelpRequests;
 
 namespace Volunteer_Corner.ApiTests.Controllers;
 

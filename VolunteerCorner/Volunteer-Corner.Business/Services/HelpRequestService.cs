@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using Volunteer_Corner.Business.Exceptions;
 using Volunteer_Corner.Business.Infrastructure.Expressions;
 using Volunteer_Corner.Business.Interfaces;
-using Volunteer_Corner.Business.Models.Requests;
+using Volunteer_Corner.Business.Models.Requests.HelpRequests;
 using Volunteer_Corner.Business.Models.Results.HelpRequests;
 using Volunteer_Corner.Data.Entities;
 using Volunteer_Corner.Data.Enums;
@@ -53,8 +53,7 @@ public class HelpRequestService : IHelpRequestService
         return result;
     }
     
-    public async Task<HelpRequestResult> UpdateAsync(string id, UpdateHelpRequestRequest request, IFormFileCollection files,
-        string directoryToSave)
+    public async Task<HelpRequestResult> UpdateAsync(string id, UpdateHelpRequestRequest request)
     {
         var helpRequestToUpdate = await _helpRequestRepository.GetByIdAsync(id);
 
@@ -63,49 +62,94 @@ public class HelpRequestService : IHelpRequestService
 
         _mapper.Map<UpdateHelpRequestRequest, HelpRequest>(request, helpRequestToUpdate);
 
-        if (files?.Any() == true)
-        {
-            if (helpRequestToUpdate.AdditionalDocuments?.Any() == false)
-            {
-                helpRequestToUpdate.AdditionalDocuments = new List<HelpRequestDocument>();
-            }
-            
-            foreach (var file in files)
-            {
-                var folderName = Path.Combine("Resources", "Documents", helpRequestToUpdate.Id);
-                var pathToSave = Path.Combine(directoryToSave, folderName);
-
-                if (!Directory.Exists(pathToSave))
-                {
-                    var dirInfo = new DirectoryInfo(pathToSave);
-                    dirInfo.Create();
-                }
-                
-                if (file.Length > 0)
-                {
-                    var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
-                    var fullPath = Path.Combine(pathToSave, fileName);
-                    var dbPath = Path.Combine(folderName, fileName);
-                    
-                    await using (var stream = new FileStream(fullPath, FileMode.Create))
-                    {
-                        await file.CopyToAsync(stream);
-                    }
-                    
-                    helpRequestToUpdate.AdditionalDocuments.Add(new HelpRequestDocument()
-                    {
-                        FilePath = dbPath,
-                        HelpRequestId = helpRequestToUpdate.Id,
-                    });
-                }
-            }
-        }
-        
         await _helpRequestRepository.UpdateAsync(helpRequestToUpdate);
         var result = _mapper.Map<HelpRequest, HelpRequestResult>(helpRequestToUpdate);
         return result;
     }
-    
+
+    public async Task DeleteDocumentsAsync(string id, DeleteHelpRequestDocumentsRequest request, string resourcesDirectory)
+    {
+        var helpRequestToUpdate = await _helpRequestRepository.GetByIdAsync(id);
+
+        if (helpRequestToUpdate == null)
+            throw new NotFoundException(nameof(HelpRequest), id);
+
+        if (helpRequestToUpdate.AdditionalDocuments?.Any() == false)
+            throw new ValidationException("No documents to delete");
+
+        var helpRequestToUpdateDocumentsIds = helpRequestToUpdate.AdditionalDocuments
+            .Select(x => x.Id)
+            .ToList();
+
+        if (request.DocumentsIds.Any(x => !helpRequestToUpdateDocumentsIds.Contains(x)))
+            throw new ValidationException("One of the documents ids is invalid");
+
+        var filesToDelete = helpRequestToUpdate.AdditionalDocuments
+            .Where(x => request.DocumentsIds.Contains(x.Id))
+            .ToList();
+        
+        foreach (var fileToDelete in filesToDelete)
+        {
+            var fullFilePath = Path.Combine(resourcesDirectory, fileToDelete.FilePath);
+            
+            if(File.Exists(fullFilePath))
+                File.Delete(fullFilePath);
+
+            var directoryPath = Path.Combine(resourcesDirectory, "Resources", "Documents", helpRequestToUpdate.Id);
+            
+            if(!Directory.GetFiles(directoryPath).Any())
+                Directory.Delete(directoryPath);
+        }
+        
+        await _helpRequestRepository.DeleteDocumentsAsync(filesToDelete);
+    }
+
+    public async Task<List<HelpRequestDocumentResult>> AddDocumentsAsync(string id, IFormFileCollection files, string directoryToSave)
+    {
+        var helpRequestToUpdate = await _helpRequestRepository.GetByIdAsync(id);
+
+        if (helpRequestToUpdate == null)
+            throw new NotFoundException(nameof(HelpRequest), id);
+
+        if (helpRequestToUpdate.AdditionalDocuments?.Any() == false)
+        {
+            helpRequestToUpdate.AdditionalDocuments = new List<HelpRequestDocument>();
+        }
+
+        foreach (var file in files)
+        {
+            var folderName = Path.Combine("Resources", "Documents", helpRequestToUpdate.Id);
+            var pathToSave = Path.Combine(directoryToSave, folderName);
+
+            if (!Directory.Exists(pathToSave))
+            {
+                var dirInfo = new DirectoryInfo(pathToSave);
+                dirInfo.Create();
+            }
+
+            if (file.Length <= 0) continue;
+            
+            var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
+            var fullPath = Path.Combine(pathToSave, fileName);
+            var dbPath = Path.Combine(folderName, fileName);
+
+            await using (var stream = new FileStream(fullPath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            helpRequestToUpdate.AdditionalDocuments.Add(new HelpRequestDocument()
+            {
+                FilePath = dbPath,
+                HelpRequestId = helpRequestToUpdate.Id,
+            });
+        }
+
+        await _helpRequestRepository.AddDocumentsAsync(helpRequestToUpdate.AdditionalDocuments);
+        var result = _mapper.Map<List<HelpRequestDocument>, List<HelpRequestDocumentResult>>(helpRequestToUpdate.AdditionalDocuments);
+        return result;
+    }
+
     public async Task<HelpRequestResult> CreateAsync(CreateHelpRequestRequest request, string helpRequestOwnerId,
         IFormFileCollection files, string directoryToSave)
     {
@@ -168,6 +212,9 @@ public class HelpRequestService : IHelpRequestService
 
         if (helpRequestToUpdate == null)
             throw new NotFoundException(nameof(HelpRequest), id);
+
+        if (helpRequestToUpdate.Status == HelpRequestStatus.Closed)
+            throw new ValidationException("You can't change status of the closed request");
 
         if (helpRequestToUpdate.Status == HelpRequestStatus.Canceled && request.NewStatus == HelpRequestStatus.Closed)
             throw new ValidationException("Canceled request can't be set to closed");
