@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Volunteer_Corner.Business.Infrastructure;
 using Volunteer_Corner.Business.Interfaces;
 using Volunteer_Corner.Business.Models.Requests;
+using Volunteer_Corner.Business.Models.Requests.Auth;
 using Volunteer_Corner.Business.Models.Results;
 using Volunteer_Corner.Data.Entities.Identity;
 

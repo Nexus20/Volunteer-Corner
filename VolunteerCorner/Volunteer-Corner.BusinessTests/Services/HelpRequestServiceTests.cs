@@ -9,6 +9,7 @@ using NUnit.Framework;
 using Volunteer_Corner.Business.Exceptions;
 using Volunteer_Corner.Business.Interfaces;
 using Volunteer_Corner.Business.Models.Requests;
+using Volunteer_Corner.Business.Models.Requests.HelpRequests;
 using Volunteer_Corner.Business.Models.Results.HelpRequests;
 using Volunteer_Corner.Business.Services;
 using Volunteer_Corner.Data.Entities;
@@ -304,7 +305,7 @@ public class HelpRequestServiceTests
         _helpRequestRepository.Setup(m => m.GetByIdAsync(It.IsAny<string>())).ReturnsAsync(helpRequest);
 
 
-        var expectedResult = $"Closed request can't be changed";
+        const string expectedResult = "You can't change status of the closed request";
 
         // Act
 
@@ -357,12 +358,7 @@ public class HelpRequestServiceTests
     {
         // Arrange
 
-        var formFiles = new FormFileCollection
-        {
-            UnitTestsHelper.GetMockFormFile("file", "file1.txt")
-        };
-
-        var updateHelpRequestStatus = new UpdateHelpRequestRequest
+        var updateHelpRequestRequest = new UpdateHelpRequestRequest
         {
             Name = "Name",
             Location = "Location",
@@ -371,18 +367,16 @@ public class HelpRequestServiceTests
 
         const string helpRequestId = "3";
 
-        const string directory = "directory";
-
         HelpRequest helpRequest = null;
         _helpRequestRepository.Setup(m => m.GetByIdAsync(It.IsAny<string>())).ReturnsAsync(helpRequest);
 
-        var expectedResult = $"Entity \"HelpRequest\" ({helpRequestId}) was not found.";
+        const string expectedResult = $"Entity \"HelpRequest\" ({helpRequestId}) was not found.";
 
         // Act
 
         var action = async () =>
         {
-            await _helpRequestService.UpdateAsync(helpRequestId, updateHelpRequestStatus, formFiles, directory);
+            await _helpRequestService.UpdateAsync(helpRequestId, updateHelpRequestRequest);
         };
 
         // Assert
@@ -396,11 +390,6 @@ public class HelpRequestServiceTests
     {
         // Arrange
 
-        var formFiles = new FormFileCollection
-        {
-            UnitTestsHelper.GetMockFormFile("file", "file1.txt")
-        };
-
         var updateHelpRequestStatus = new UpdateHelpRequestRequest
         {
             Name = "Name",
@@ -409,8 +398,6 @@ public class HelpRequestServiceTests
         };
 
         const string helpRequestId = "3";
-
-        const string directory = "directory";
 
         var time = DateTime.Now;
 
@@ -429,7 +416,7 @@ public class HelpRequestServiceTests
 
         // Act
 
-        var action = await _helpRequestService.UpdateAsync(helpRequestId, updateHelpRequestStatus, formFiles, directory);
+        var action = await _helpRequestService.UpdateAsync(helpRequestId, updateHelpRequestStatus);
 
         // Assert
 
