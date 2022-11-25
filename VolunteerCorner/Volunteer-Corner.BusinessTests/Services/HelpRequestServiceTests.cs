@@ -214,4 +214,225 @@ public class HelpRequestServiceTests
         // Assert
         actualResult.Should().BeEquivalentTo(expectedResult, o => o.Excluding(x => x.Id));
     }
+
+    [Test]
+
+    public async Task ChangeStatusAsync_WhenHelpRequestIsNotFound_ThrowNotFoundException()
+    {
+        // Arrange
+
+        var updateHelpRequestStatus = new UpdateHelpRequestStatus
+        {
+            NewStatus = HelpRequestStatus.Canceled
+        };
+
+        const string helpRequestId = "3";
+
+        HelpRequest helpRequest = null;
+
+        _helpRequestRepository.Setup(m => m.GetByIdAsync(It.IsAny<string>())).ReturnsAsync(helpRequest);
+
+        var expectedResult = $"Entity \"{nameof(HelpRequest)}\" ({helpRequestId}) was not found.";
+
+        // Act
+
+        var action = async () =>
+        {
+            await _helpRequestService.ChangeStatusAsync(helpRequestId, updateHelpRequestStatus);
+        };
+
+        // Assert
+        await action.Should().ThrowAsync<NotFoundException>()
+            .WithMessage(expectedResult);
+
+    }
+
+    [Test]
+    public async Task ChangeStatusAsync_WhenHelpRequestStatusTryingToChangeFromCanceledToClosed_ThrowValidationException()
+    {
+        // Arrange
+
+        var updateHelpRequestStatus = new UpdateHelpRequestStatus
+        {
+            NewStatus = HelpRequestStatus.Closed
+        };
+
+        const string helpRequestId = "3";
+
+        var helpRequest = new HelpRequest()
+        {
+            Id = "3",
+            Status = HelpRequestStatus.Canceled
+        };
+
+        _helpRequestRepository.Setup(m => m.GetByIdAsync(It.IsAny<string>())).ReturnsAsync(helpRequest);
+
+
+        var expectedResult = $"Canceled request can't be set to closed";
+
+        // Act
+
+        var action = async () =>
+        {
+            await _helpRequestService.ChangeStatusAsync(helpRequestId, updateHelpRequestStatus);
+        };
+
+        // Assert
+        await action.Should().ThrowAsync<ValidationException>()
+            .WithMessage(expectedResult);
+
+    }
+
+    [Test]
+    public async Task ChangeStatusAsync_WhenHelpRequestStatusTryingToChangeFromClosedToAny_ThrowValidationException()
+    {
+        // Arrange
+
+        var updateHelpRequestStatus = new UpdateHelpRequestStatus
+        {
+            NewStatus = HelpRequestStatus.Active
+        };
+
+        const string helpRequestId = "3";
+
+        var helpRequest = new HelpRequest()
+        {
+            Id = "3",
+            Status = HelpRequestStatus.Closed
+        };
+
+        _helpRequestRepository.Setup(m => m.GetByIdAsync(It.IsAny<string>())).ReturnsAsync(helpRequest);
+
+
+        var expectedResult = $"Closed request can't be changed";
+
+        // Act
+
+        var action = async () =>
+        {
+            await _helpRequestService.ChangeStatusAsync(helpRequestId, updateHelpRequestStatus);
+        };
+
+        // Assert
+        await action.Should().ThrowAsync<ValidationException>()
+            .WithMessage(expectedResult);
+
+    }
+
+    [Test]
+    public async Task ChangeStatusAsync_WhenOwnerIsUpdatingRequestStatus_ReturnsResultAccordingToRequest()
+    {
+        // Arrange
+
+        const HelpRequestStatus expectedResult = HelpRequestStatus.Closed;
+
+        var updateHelpRequestStatus = new UpdateHelpRequestStatus
+        {
+            NewStatus = expectedResult
+        };
+
+        const string helpRequestId = "3";
+
+        var helpRequest = new HelpRequest()
+        {
+            Id = "3",
+            Status = HelpRequestStatus.Active
+        };
+
+        _helpRequestRepository.Setup(m => m.GetByIdAsync(It.IsAny<string>())).ReturnsAsync(helpRequest);
+
+        _helpRequestRepository.Setup(m => m.UpdateAsync(It.IsAny<HelpRequest>()));
+
+        // Act
+
+        var actualResult = await _helpRequestService.ChangeStatusAsync(helpRequestId, updateHelpRequestStatus);
+
+        // Assert
+
+        actualResult.Should().Be(expectedResult);
+    }
+
+    [Test]
+    public async Task UpdateAsync_WhenHelpRequestIsNotFound_ThrowNotFoundException()
+    {
+        // Arrange
+
+        var formFiles = new FormFileCollection
+        {
+            UnitTestsHelper.GetMockFormFile("file", "file1.txt")
+        };
+
+        var updateHelpRequestStatus = new UpdateHelpRequestRequest
+        {
+            Name = "Name",
+            Location = "Location",
+            Description = "Description"
+        };
+
+        const string helpRequestId = "3";
+
+        const string directory = "directory";
+
+        HelpRequest helpRequest = null;
+        _helpRequestRepository.Setup(m => m.GetByIdAsync(It.IsAny<string>())).ReturnsAsync(helpRequest);
+
+        var expectedResult = $"Entity \"HelpRequest\" ({helpRequestId}) was not found.";
+
+        // Act
+
+        var action = async () =>
+        {
+            await _helpRequestService.UpdateAsync(helpRequestId, updateHelpRequestStatus, formFiles, directory);
+        };
+
+        // Assert
+
+        await action.Should().ThrowAsync<NotFoundException>()
+            .WithMessage(expectedResult);
+    }
+
+    [Test]
+    public async Task UpdateAsync_WhenOwnerIsUpdatingRequest_ReturnsResultAccordingToRequest()
+    {
+        // Arrange
+
+        var formFiles = new FormFileCollection
+        {
+            UnitTestsHelper.GetMockFormFile("file", "file1.txt")
+        };
+
+        var updateHelpRequestStatus = new UpdateHelpRequestRequest
+        {
+            Name = "Name",
+            Location = "Location",
+            Description = "Description"
+        };
+
+        const string helpRequestId = "3";
+
+        const string directory = "directory";
+
+        var time = DateTime.Now;
+
+        var helpRequest = new HelpRequest()
+        {
+            Id = helpRequestId,
+            Status = HelpRequestStatus.Active,
+            CreatedDate = time
+        };
+
+        var temporaryResult = _mapper.Map<UpdateHelpRequestRequest, HelpRequest>(updateHelpRequestStatus, helpRequest);
+
+        var expectedResult = _mapper.Map<HelpRequest, HelpRequestResult>(temporaryResult);
+
+        _helpRequestRepository.Setup(m => m.GetByIdAsync(It.IsAny<string>())).ReturnsAsync(helpRequest);
+
+        // Act
+
+        var action = await _helpRequestService.UpdateAsync(helpRequestId, updateHelpRequestStatus, formFiles, directory);
+
+        // Assert
+
+        action.Should().BeEquivalentTo(expectedResult);
+    }
 }

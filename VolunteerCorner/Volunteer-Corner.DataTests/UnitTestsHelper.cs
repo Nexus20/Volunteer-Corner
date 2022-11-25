@@ -96,6 +96,7 @@ internal static class UnitTestsHelper
                     Description = "Help request 1 Description",
                     Status = HelpRequestStatus.Active,
                     OwnerId = "1",
+                    Location = "Location"
                 },
                 new HelpRequest()
                 {
@@ -104,6 +105,7 @@ internal static class UnitTestsHelper
                     Description = "Help request 2 Description",
                     Status = HelpRequestStatus.Active,
                     OwnerId = "2",
+                    Location = "Location"
                 },
                 new HelpRequest()
                 {
@@ -112,6 +114,7 @@ internal static class UnitTestsHelper
                     Description = "Help request 3 Description",
                     Status = HelpRequestStatus.Active,
                     OwnerId = "3",
+                    Location = "Location"
                 }
             );
         }

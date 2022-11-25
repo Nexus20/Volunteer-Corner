@@ -159,7 +159,8 @@ namespace Volunteer_Corner.DataTests.Repositories
                 Name = "Help request 4 Name",
                 Description = "Help request 4 Description",
                 Status = HelpRequestStatus.Active,
-                OwnerId = "3"
+                OwnerId = "3",
+                Location = "Location"
             };
 
             var expectedCount = await _dbContext.HelpRequests.CountAsync() + 1;
