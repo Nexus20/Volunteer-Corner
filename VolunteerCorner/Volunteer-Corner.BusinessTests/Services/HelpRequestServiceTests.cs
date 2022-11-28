@@ -491,4 +491,172 @@ public class HelpRequestServiceTests
 
         action.Should().BeEquivalentTo(expectedResult);
     }
+
+    [Test]
+    public async Task DeleteDocumentsAsync_WhenHelpRequestIsNotFound_ThrowNotFoundException()
+    {
+        // Arrange
+
+        const string helpRequestId = "3";
+
+        const string directory = "directory";
+
+        DeleteHelpRequestDocumentsRequest deleteHelpRequestDocuments = null;
+
+        HelpRequest helpRequest = null;
+
+        _helpRequestRepository.Setup(m => m.GetByIdAsync(It.IsAny<string>())).ReturnsAsync(helpRequest);
+
+        const string expectedResult = $"Entity \"HelpRequest\" ({helpRequestId}) was not found.";
+
+        // Act
+
+        var action = async () =>
+        {
+            await _helpRequestService.DeleteDocumentsAsync(helpRequestId, deleteHelpRequestDocuments, directory);
+        };
+
+        // Assert
+
+        await action.Should().ThrowAsync<NotFoundException>()
+            .WithMessage(expectedResult);
+    }
+    [Test]
+    public async Task DeleteDocumentsAsync_WhenHelpRequestIsNotFound_ThrowValidationException()
+    {
+        // Arrange
+
+        const string helpRequestId = "3";
+
+        const string directory = "directory";
+
+        var deleteHelpRequestDocuments = new DeleteHelpRequestDocumentsRequest()
+        {
+            DocumentsIds = new List<string>
+            {
+                "2"
+            }
+        };
+
+        HelpRequest helpRequest = new HelpRequest()
+        {
+            Id = "3",
+            AdditionalDocuments = new List<HelpRequestDocument>()
+            {
+
+            }
+        };
+
+        _helpRequestRepository.Setup(m => m.GetByIdAsync(It.IsAny<string>())).ReturnsAsync(helpRequest);
+
+        const string expectedResult = $"No documents to delete";
+
+        // Act
+
+        var action = async () =>
+        {
+            await _helpRequestService.DeleteDocumentsAsync(helpRequestId, deleteHelpRequestDocuments, directory);
+        };
+
+        // Assert
+
+        await action.Should().ThrowAsync<ValidationException>()
+            .WithMessage(expectedResult);
+    }
+
+    [Test]
+    public async Task DeleteDocumentsAsync_WhenHelpRequestDocumentsIsInvalid_ThrowValidationException()
+    {
+        // Arrange
+
+        const string helpRequestId = "3";
+
+        const string directory = "directory";
+
+        var deleteHelpRequestDocuments = new DeleteHelpRequestDocumentsRequest()
+        {
+            DocumentsIds = new List<string>
+            {
+                "2"
+            }
+        };
+
+        HelpRequest helpRequest = new HelpRequest()
+        {
+            Id = "3",
+            AdditionalDocuments = new List<HelpRequestDocument>()
+            {
+                new HelpRequestDocument()
+                {
+                    Id = "1"
+                }
+            }
+        };
+
+        _helpRequestRepository.Setup(m => m.GetByIdAsync(It.IsAny<string>())).ReturnsAsync(helpRequest);
+
+        const string expectedResult = $"One of the documents ids is invalid";
+
+        // Act
+
+        var action = async () =>
+        {
+            await _helpRequestService.DeleteDocumentsAsync(helpRequestId, deleteHelpRequestDocuments, directory);
+        };
+
+        // Assert
+
+        await action.Should().ThrowAsync<ValidationException>()
+            .WithMessage(expectedResult);
+    }
+
+
+    [Test]
+    public async Task DeleteDocumentsAsync_WhenHelpRequestDocuments_ReturnsResultAccordingToRequest()
+    {
+        // Arrange
+
+        const string helpRequestId = "3";
+
+        const string directory = "directory";
+
+        var deleteHelpRequestDocuments = new DeleteHelpRequestDocumentsRequest()
+        {
+            DocumentsIds = new List<string>
+            {
+                "2"
+            }
+        };
+
+        HelpRequest helpRequest = new HelpRequest()
+        {
+            Id = "3",
+            AdditionalDocuments = new List<HelpRequestDocument>()
+            {
+                new HelpRequestDocument()
+                {
+                    Id = "2"
+                },
+                new HelpRequestDocument()
+                {
+                    Id = "3"
+                }
+            }
+        };
+
+        _helpRequestRepository.Setup(m => m.GetByIdAsync(It.IsAny<string>())).ReturnsAsync(helpRequest);
+
+        const string expectedResult = $"One of the documents ids is invalid";
+
+        // Act
+
+        var action = async () =>
+        {
+            await _helpRequestService.DeleteDocumentsAsync(helpRequestId, deleteHelpRequestDocuments, directory);
+        };
+
+        // Assert
+        // TODO: как проверить правильность
+        //await action.Should().
+    }
 }
