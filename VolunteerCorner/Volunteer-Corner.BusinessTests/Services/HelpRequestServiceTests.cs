@@ -422,4 +422,73 @@ public class HelpRequestServiceTests
 
         action.Should().BeEquivalentTo(expectedResult);
     }
+
+    [Test]
+    public async Task AddDocumentsAsync_WhenRequestIsNotFound_ThrowNotFoundException()
+    {
+        // Arrange
+
+        var formFiles = new FormFileCollection
+        {
+            UnitTestsHelper.GetMockFormFile("file", "file1.txt")
+        };
+
+        const string helpRequestId = "3";
+
+        const string directory = "directory";
+
+        HelpRequest request = null;
+
+        _helpRequestRepository.Setup(m => m.GetByIdAsync(It.IsAny<string>())).ReturnsAsync(request);
+       
+        const string expectedResult = $"Entity \"HelpRequest\" ({helpRequestId}) was not found.";
+
+        // Act
+
+        var action = async () =>
+        {
+            await _helpRequestService.AddDocumentsAsync(helpRequestId, formFiles, directory);
+        };
+
+        // Assert
+
+        await action.Should().ThrowAsync<NotFoundException>()
+            .WithMessage(expectedResult);
+
+    }
+
+    [Test]
+    public async Task AddDocumentsAsync_WhenOwnerIsUpdatingDocuments_ReturnsResultAccordingToRequest()
+    {
+        // Arrange
+
+        var formFiles = new FormFileCollection
+        {
+            UnitTestsHelper.GetMockFormFile("file", "file1.txt")
+        };
+
+        const string helpRequestId = "3";
+
+        const string directory = "directory";
+
+        HelpRequest request = new HelpRequest()
+        {
+            Id = "3",
+            OwnerId = "3"
+        };
+
+        _helpRequestRepository.Setup(m => m.GetByIdAsync(It.IsAny<string>())).ReturnsAsync(request);
+
+        _helpRequestRepository.Setup(m => m.AddDocumentsAsync(It.IsAny<List<HelpRequestDocument>>()));
+        var expectedResult = _mapper.Map<List<HelpRequestDocument>, List<HelpRequestDocumentResult>>(request.AdditionalDocuments);
+
+        // Act
+
+        var action = await _helpRequestService.AddDocumentsAsync(helpRequestId, formFiles, directory);
+       
+
+        // Assert
+
+        action.Should().BeEquivalentTo(expectedResult);
+    }
 }
