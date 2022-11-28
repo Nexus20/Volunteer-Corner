@@ -635,18 +635,18 @@ public class HelpRequestServiceTests
             {
                 new HelpRequestDocument()
                 {
-                    Id = "2"
+                    Id = "2",
+                    FilePath = "Path"
                 },
                 new HelpRequestDocument()
                 {
-                    Id = "3"
+                    Id = "3",
+                    FilePath = "Path"
                 }
             }
         };
 
         _helpRequestRepository.Setup(m => m.GetByIdAsync(It.IsAny<string>())).ReturnsAsync(helpRequest);
-
-        const string expectedResult = $"One of the documents ids is invalid";
 
         // Act
 
@@ -656,7 +656,7 @@ public class HelpRequestServiceTests
         };
 
         // Assert
-        // TODO: как проверить правильность
-        //await action.Should().
+
+        await action.Should().NotThrowAsync();
     }
 }
