@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Volunteer_Corner.Data.Entities;
 using Volunteer_Corner.Data.Interfaces;
@@ -32,6 +33,26 @@ public class HelpRequestRepository : Repository<HelpRequest>, IHelpRequestReposi
         }
 
         return null;
+    }
+
+    public Task<List<HelpRequest>> GetAsync(Expression<Func<HelpRequest, bool>>? predicate = null, Func<IQueryable<HelpRequest>, IOrderedQueryable<HelpRequest>> orderBy = null, bool disableTracking = true)
+    {
+        var query = Db.HelpRequests
+            .Include(x => x.AdditionalDocuments)
+            .Include(x => x.Owner)
+            .ThenInclude(x => x.User)
+            .AsQueryable();
+
+        if (predicate != null)
+            query = query.Where(predicate);
+
+        if (disableTracking)
+            query = query.AsNoTracking();
+
+        if (orderBy != null)
+            query = orderBy(query);
+
+        return query.ToListAsync();
     }
 
     public Task DeleteDocumentsAsync(List<HelpRequestDocument> documentsToRemove)

@@ -32,11 +32,7 @@ public class HelpRequestService : IHelpRequestService
     public async Task<List<HelpRequestResult>> GetAllHelpRequests(GetAllHelpRequestsRequest request)
     {
         var predicate = CreateFilterPredicate(request);
-        var source = await _helpRequestRepository.GetAsync(predicate, includes: new List<Expression<Func<HelpRequest, object>>>()
-        {
-            x => x.Owner,
-            x => x.AdditionalDocuments
-        });
+        var source = await _helpRequestRepository.GetAsync(predicate);
 
         var result = _mapper.Map<List<HelpRequest>, List<HelpRequestResult>>(source);
         return result;
