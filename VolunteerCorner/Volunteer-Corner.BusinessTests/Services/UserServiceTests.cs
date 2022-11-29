@@ -3,6 +3,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 using Moq;
 using NUnit.Framework;
 using Volunteer_Corner.Business.Exceptions;
@@ -10,6 +11,7 @@ using Volunteer_Corner.Business.Interfaces;
 using Volunteer_Corner.Business.Models.Enums;
 using Volunteer_Corner.Business.Models.Requests;
 using Volunteer_Corner.Business.Models.Requests.Auth;
+using Volunteer_Corner.Business.Models.Requests.Users;
 using Volunteer_Corner.Business.Models.Results;
 using Volunteer_Corner.Business.Services;
 using Volunteer_Corner.BusinessTests.EqualityComparers;
@@ -328,5 +330,116 @@ public class UserServiceTests
         
         // Assert
         actualVolunteersCount.Should().Be(expectedVolunteersCount);
+    }
+
+    [Test]
+    public async Task UpdateProfileAsync_WhenUserIdNotExist_NotFoundException()
+    {
+        //Arrange
+
+        const string userId = "Some existing Id";
+        const string firstName = "Some user firstname";
+        const string lastName = "Some user lastname";
+        const string userEmail = "Some user Email";
+        const string phoneNumber = "Some user Email";
+
+        var request = new UpdateOwnProfileRequest()
+        {
+            FirstName = firstName,
+            LastName = lastName,
+            Email = userEmail,
+            PhoneNumber = phoneNumber
+        };
+
+        //User user = new User();
+        //user = null;
+        User user = null;
+
+        var expectedMessage = $"Entity \"User\" ({userId}) was not found.";
+
+        _mockedUserManager.Setup(m => m.FindByIdAsync(It.IsAny<string>()))
+            .ReturnsAsync(user);
+
+
+        // Act
+        var action = async () => { await _userService.UpdateOwnProfileAsync(userId,request); };
+
+        // Assert
+        await action.Should().ThrowAsync<NotFoundException>()
+            .WithMessage(expectedMessage);
+    }
+
+    [Test]
+    public async Task UpdateProfileAsync_WhenAllIsRight_ReturnsCorrectResult()
+    {
+        //Arrange
+
+        const string userId = "Some existing Id";
+        const string firstName = "Some user firstname";
+        const string lastName = "Some user lastname";
+        const string userEmail = "Some user Email";
+        const string phoneNumber = "Some user Email";
+
+
+        var request = new UpdateOwnProfileRequest()
+        {
+            FirstName = firstName,
+            LastName = lastName,
+            Email = userEmail,
+            PhoneNumber = phoneNumber
+        };
+
+        var userToUpdate = _mapper.Map<UpdateOwnProfileRequest, User>(request);
+        var expectedResult = _mapper.Map<User, UserResult>(userToUpdate);
+
+        _mockedUserManager.Setup(m => m.FindByIdAsync(It.IsAny<string>()))
+            .ReturnsAsync(userToUpdate);
+
+        _mockedUserManager.Setup(m => m.UpdateAsync(It.IsAny<User>()))
+            .ReturnsAsync(IdentityResult.Success);
+
+        // Act
+        var actualResult = await _userService.UpdateOwnProfileAsync(userId, request);
+
+        // Assert
+        actualResult.Should().Be(expectedResult);
+    }
+
+
+    [Test]
+    public async Task UpdateProfileAsync_WhenNotUpdate_IdentityException()
+    {
+        //Arrange
+
+        const string userId = "Some existing Id";
+        const string firstName = "Some user firstname";
+        const string lastName = "Some user lastname";
+        const string userEmail = "Some user Email";
+        const string phoneNumber = "Some user Email";
+
+        var request = new UpdateOwnProfileRequest()
+        {
+            FirstName = firstName,
+            LastName = lastName,
+            Email = userEmail,
+            PhoneNumber = phoneNumber
+        };
+
+        var identityResult = IdentityResult.Failed(new IdentityError()
+        {
+            Code = "123",
+            Description = "Error with brain of new customer"
+        });
+
+        _mockedUserManager.Setup(m => m.FindByIdAsync(It.IsAny<string>()))
+            .ReturnsAsync(new User());
+        _mockedUserManager.Setup(m => m.UpdateAsync(It.IsAny<User>())).ReturnsAsync(identityResult);
+
+
+        // Act
+        var action = async () => { await _userService.UpdateOwnProfileAsync(userId, request); };
+
+        // Assert
+        await action.Should().ThrowAsync<IdentityException>();
     }
 }
