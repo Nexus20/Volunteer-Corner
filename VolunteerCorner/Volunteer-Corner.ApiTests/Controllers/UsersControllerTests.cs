@@ -5,6 +5,7 @@ using Moq;
 using Volunteer_Corner.API.Controllers;
 using Volunteer_Corner.Business.Models.Requests;
 using Volunteer_Corner.Business.Models.Requests.Auth;
+using Volunteer_Corner.Business.Models.Requests.Users;
 using Volunteer_Corner.Business.Models.Results;
 
 namespace Volunteer_Corner.ApiTests.Controllers;
@@ -100,4 +101,47 @@ public class UsersControllerTests
         actualResult!.Value.Should().BeEquivalentTo(expectedResult);
         actualResult.StatusCode.Should().Be(StatusCodes.Status401Unauthorized);
     }
+
+    [Test]
+    public async Task UpdateProfile_WhenUpdateProfileSuccessfully_ReturnsStatus200()
+    {
+        // Arrange
+        const string firstName = "Some user firstname";
+        const string lastName = "Some user lastname";
+        const string userEmail = "Some user Email";
+        const string phoneNumber = "Some user Email";
+        const string id = "some id";
+
+        var expectedResult = new UserResult()
+        {
+            Id = id,
+            UserName = "test",
+            Email = "emailTest",
+            PhoneNumber = "test",
+            FirstName = "FirstNameTest",
+            LastName = "Test"
+
+        };
+
+
+        var request = new UpdateOwnProfileRequest()
+        {
+            FirstName = firstName,
+            LastName = lastName,
+            Email = userEmail,
+            PhoneNumber = phoneNumber
+        };
+
+        _mockedUserService.Setup(m => m.UpdateOwnProfileAsync(It.IsAny<string>(), It.IsAny<UpdateOwnProfileRequest>()))
+            .ReturnsAsync(expectedResult);
+
+        // Act
+        var actualResult = await _usersController.UpdateProfile(Mock.Of<UpdateOwnProfileRequest>()) as ObjectResult;
+
+        // Assert
+        actualResult.Should().NotBeNull();
+        actualResult!.Value.Should().BeEquivalentTo(request);
+        actualResult.StatusCode.Should().Be(StatusCodes.Status200OK);
+    }
+
 }
