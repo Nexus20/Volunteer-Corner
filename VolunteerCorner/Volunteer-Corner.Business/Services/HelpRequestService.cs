@@ -284,6 +284,12 @@ public class HelpRequestService : IHelpRequestService
             predicate = ExpressionsHelper.And(predicate, dateExpression);
         }
 
+        if (!string.IsNullOrWhiteSpace(request.OwnerId))
+        {
+            Expression<Func<HelpRequest, bool>> ownerPredicate = x => x.OwnerId == request.OwnerId;
+            predicate = ExpressionsHelper.And(predicate, ownerPredicate);
+        }
+
         return predicate;
     }
 }
