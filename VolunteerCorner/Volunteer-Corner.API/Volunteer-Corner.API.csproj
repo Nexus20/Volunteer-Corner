@@ -26,7 +26,12 @@
   <ItemGroup>
     <Folder Include="Controllers" />
     <Folder Include="Resources\Documents" />
+    <Folder Include="Resources\Documents\2f9f903c-9d86-4135-9213-ce2051f93412" />
     <Folder Include="Resources\Images" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\Documents\2f9f903c-9d86-4135-9213-ce2051f93412\file-2.pdf" />
   </ItemGroup>
 
 </Project>

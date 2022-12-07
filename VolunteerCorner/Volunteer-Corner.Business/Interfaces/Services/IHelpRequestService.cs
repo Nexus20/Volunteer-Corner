@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Volunteer_Corner.Business.Models.Requests;
+using Volunteer_Corner.Business.Models.Dtos.Files;
 using Volunteer_Corner.Business.Models.Requests.HelpRequests;
 using Volunteer_Corner.Business.Models.Results.HelpRequests;
 using Volunteer_Corner.Data.Enums;
 
-namespace Volunteer_Corner.Business.Interfaces;
+namespace Volunteer_Corner.Business.Interfaces.Services;
 
 public interface IHelpRequestService
 {
@@ -14,6 +14,6 @@ public interface IHelpRequestService
         IFormFileCollection files, string directoryToSave);
     Task<HelpRequestStatus> ChangeStatusAsync(string id, UpdateHelpRequestStatus request);
     Task<HelpRequestResult> UpdateAsync(string id, UpdateHelpRequestRequest request);
-    Task DeleteDocumentsAsync(string id, DeleteHelpRequestDocumentsRequest request, string resourcesDirectory);
-    Task<List<HelpRequestDocumentResult>> AddDocumentsAsync(string id, IFormFileCollection files, string directoryToSave);
+    Task DeleteDocumentsAsync(string id, DeleteHelpRequestDocumentsRequest request);
+    Task<List<HelpRequestDocumentResult>> AddDocumentsAsync(string id, List<FileDto> filesDtos);
 }
