@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Volunteer_Corner.Business;
-using Volunteer_Corner.Business.Interfaces;
+using Volunteer_Corner.Business.Interfaces.Services;
+using Volunteer_Corner.Business.Models.Dtos.Files;
 using Volunteer_Corner.Business.Models.Requests.HelpRequests;
 using Volunteer_Corner.Business.Models.Results.HelpRequests;
 
@@ -79,7 +80,7 @@ namespace Volunteer_Corner.API.Controllers
         [HttpPatch("{id}/[action]")]
         public async Task<IActionResult> DeleteDocuments(string id, [FromBody] DeleteHelpRequestDocumentsRequest request)
         {
-            await _helpRequestService.DeleteDocumentsAsync(id, request, Directory.GetCurrentDirectory());
+            await _helpRequestService.DeleteDocumentsAsync(id, request);
             return NoContent();
         }
         
@@ -89,7 +90,19 @@ namespace Volunteer_Corner.API.Controllers
             if (!Request.Form.Files.Any())
                 return BadRequest();
             
-            var result = await _helpRequestService.AddDocumentsAsync(id, Request.Form.Files, Directory.GetCurrentDirectory());
+            var filesDtos = new List<FileDto>();
+
+            foreach (var formFile in Request.Form.Files)
+            {
+                filesDtos.Add(new FileDto()
+                {
+                    Content = formFile.OpenReadStream(),
+                    Name = formFile.FileName,
+                    ContentType = formFile.ContentType
+                });
+            }
+            
+            var result = await _helpRequestService.AddDocumentsAsync(id, filesDtos);
             return Ok(result);
         }
 

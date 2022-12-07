@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Volunteer_Corner.Business.Exceptions;
 using Volunteer_Corner.Business.Infrastructure.Expressions;
-using Volunteer_Corner.Business.Interfaces;
+using Volunteer_Corner.Business.Interfaces.Infrastructure;
+using Volunteer_Corner.Business.Interfaces.Services;
+using Volunteer_Corner.Business.Models.Dtos.Files;
 using Volunteer_Corner.Business.Models.Requests.HelpRequests;
 using Volunteer_Corner.Business.Models.Results.HelpRequests;
 using Volunteer_Corner.Data.Entities;
@@ -20,13 +22,15 @@ public class HelpRequestService : IHelpRequestService
     private readonly IHelpRequestRepository _helpRequestRepository;
     private readonly IRepository<HelpSeeker> _helpSeekerRepository;
     private readonly ILogger<HelpRequestService> _logger;
+    private readonly IFileStorageService _fileStorageService;
 
-    public HelpRequestService(IHelpRequestRepository helpRequestRepository, IMapper mapper, IRepository<HelpSeeker> helpSeekerRepository, ILogger<HelpRequestService> logger)
+    public HelpRequestService(IHelpRequestRepository helpRequestRepository, IMapper mapper, IRepository<HelpSeeker> helpSeekerRepository, ILogger<HelpRequestService> logger, IFileStorageService fileStorageService)
     {
         _helpRequestRepository = helpRequestRepository;
         _mapper = mapper;
         _helpSeekerRepository = helpSeekerRepository;
         _logger = logger;
+        _fileStorageService = fileStorageService;
     }
 
     public async Task<List<HelpRequestResult>> GetAllHelpRequests(GetAllHelpRequestsRequest request)
@@ -63,7 +67,7 @@ public class HelpRequestService : IHelpRequestService
         return result;
     }
 
-    public async Task DeleteDocumentsAsync(string id, DeleteHelpRequestDocumentsRequest request, string resourcesDirectory)
+    public async Task DeleteDocumentsAsync(string id, DeleteHelpRequestDocumentsRequest request)
     {
         var helpRequestToUpdate = await _helpRequestRepository.GetByIdAsync(id);
 
@@ -83,21 +87,53 @@ public class HelpRequestService : IHelpRequestService
         var filesToDelete = helpRequestToUpdate.AdditionalDocuments
             .Where(x => request.DocumentsIds.Contains(x.Id))
             .ToList();
-        
-        foreach (var fileToDelete in filesToDelete)
-        {
-            var fullFilePath = Path.Combine(resourcesDirectory, fileToDelete.FilePath);
-            
-            if(File.Exists(fullFilePath))
-                File.Delete(fullFilePath);
 
-            var directoryPath = Path.Combine(resourcesDirectory, "Resources", "Documents", helpRequestToUpdate.Id);
-            
-            if(!Directory.GetFiles(directoryPath).Any())
-                Directory.Delete(directoryPath);
+        await _fileStorageService.DeleteAsync(new UrlsDto(filesToDelete.Select(x => x.FilePath).ToList()));
+        await _helpRequestRepository.DeleteDocumentsAsync(filesToDelete);
+    }
+
+    public async Task<List<HelpRequestDocumentResult>> AddDocumentsAsync(string id, List<FileDto> filesDtos)
+    {
+        if (filesDtos.Any(x => x.Content.Length == 0))
+        {
+            throw new ValidationException("Files cannot be empty");
+        }
+
+        var validTypes = new[] { "application/pdf" };
+        
+        if (filesDtos.Any(x => !validTypes.Contains(x.ContentType)))
+        {
+            throw new ValidationException("Invalid file types");
         }
         
-        await _helpRequestRepository.DeleteDocumentsAsync(filesToDelete);
+        var helpRequestToUpdate = await _helpRequestRepository.GetByIdAsync(id);
+
+        if (helpRequestToUpdate == null)
+            throw new NotFoundException(nameof(HelpRequest), id);
+
+        if (helpRequestToUpdate.AdditionalDocuments?.Any() == false)
+        {
+            helpRequestToUpdate.AdditionalDocuments = new List<HelpRequestDocument>();
+        }
+        
+        var urls = await _fileStorageService.UploadAsync(filesDtos);
+        
+        var helpRequestDocuments = new List<HelpRequestDocument>();
+
+        foreach (var fileUrl in urls.Urls)
+        {
+            var helpRequestDocument = new HelpRequestDocument()
+            {
+                FilePath = fileUrl,
+                HelpRequestId = helpRequestToUpdate.Id
+            };
+            
+            helpRequestDocuments.Add(helpRequestDocument);
+        }
+
+        await _helpRequestRepository.AddDocumentsAsync(helpRequestDocuments);
+        var result = _mapper.Map<List<HelpRequestDocument>, List<HelpRequestDocumentResult>>(helpRequestDocuments);
+        return result;
     }
 
     public async Task<List<HelpRequestDocumentResult>> AddDocumentsAsync(string id, IFormFileCollection files, string directoryToSave)

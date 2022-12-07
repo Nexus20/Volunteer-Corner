@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Volunteer_Corner.Business.Exceptions;
 using Volunteer_Corner.Business.Interfaces;
+using Volunteer_Corner.Business.Interfaces.Services;
 using Volunteer_Corner.Business.Models.Enums;
 using Volunteer_Corner.Business.Models.Requests;
 using Volunteer_Corner.Business.Models.Requests.Auth;

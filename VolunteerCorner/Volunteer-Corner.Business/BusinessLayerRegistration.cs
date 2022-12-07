@@ -1,8 +1,12 @@
 ﻿using System.Reflection;
+using Azure.Storage.Blobs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Volunteer_Corner.Business.Infrastructure;
+using Volunteer_Corner.Business.Infrastructure.FileStorage;
 using Volunteer_Corner.Business.Interfaces;
+using Volunteer_Corner.Business.Interfaces.Infrastructure;
+using Volunteer_Corner.Business.Interfaces.Services;
 using Volunteer_Corner.Business.Services;
 using Volunteer_Corner.Data;
 
@@ -21,6 +25,10 @@ public static class BusinessLayerRegistration
         services.AddScoped<ISignInService, SignInService>();
         services.AddScoped<IHelpRequestService, HelpRequestService>();
         services.AddScoped<JwtHandler>();
+        
+        var blobStorageConnectionString = configuration.GetValue<string>("BlobStorageSettings:ConnectionString");
+        services.AddSingleton(x => new BlobServiceClient(blobStorageConnectionString));
+        services.AddScoped<IFileStorageService, BlobStorageService>();
 
         return services;
     }
