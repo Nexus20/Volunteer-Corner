@@ -118,6 +118,32 @@ internal static class UnitTestsHelper
                 }
             );
         }
+        if (!context.HelpRequestDocuments.Any())
+        {
+            context.HelpRequestDocuments.AddRange(
+                new HelpRequestDocument()
+                {
+                    Id = "1",
+                    FilePath = "Path",
+                    HelpRequestId = "1"
+              
+                },
+                new HelpRequestDocument()
+                {
+                    Id = "2",
+                    FilePath = "Path",
+                    HelpRequestId = "1"
+
+                },
+                new HelpRequestDocument()
+                {
+                    Id = "3",
+                    FilePath = "Path",
+                    HelpRequestId = "1"
+
+                }
+            );
+        }
 
         context.SaveChanges();
     }
