@@ -32,9 +32,9 @@ namespace Volunteer_Corner.API.Controllers
         }
 
         // GET: api/HelpRequests/5
-        [HttpGet("{id}", Name = "Get")]
+        [HttpGet("{id}", Name = "Get help request by id")]
         [ProducesResponseType(typeof(HelpRequestResult), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Get(string id)
+        public async Task<IActionResult> GetById(string id)
         {
             var result = await _helpRequestService.GetHelpRequestById(id);
             return Ok(result);
