@@ -1,6 +1,9 @@
 ﻿using System.Linq.Expressions;
+using Castle.Core.Logging;
+using Moq;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using Volunteer_Corner.Data;
 using Volunteer_Corner.Data.Entities;
@@ -15,6 +18,8 @@ namespace Volunteer_Corner.DataTests.Repositories
     {
         private ApplicationDbContext _dbContext = null!;
         private IRepository<HelpRequest> _repository = null!;
+        private Mock<ILogger<HelpRequestRepository>> _mockedLogger;
+        private HelpRequestRepository _helpRequestRepository = null!;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
@@ -30,6 +35,8 @@ namespace Volunteer_Corner.DataTests.Repositories
             // Do initializing stuff that needs to be applied before each test
             _dbContext = new ApplicationDbContext(UnitTestsHelper.GetUnitTestDbOptions());
             _repository = new Repository<HelpRequest>(_dbContext);
+            _mockedLogger = new Mock<ILogger<HelpRequestRepository>>();
+            _helpRequestRepository = new HelpRequestRepository(_dbContext, _mockedLogger.Object);
         }
 
         [TearDown]
@@ -189,6 +196,56 @@ namespace Volunteer_Corner.DataTests.Repositories
             // Act
             await _repository.DeleteAsync(helpRequest);
             var actualCount = await _dbContext.HelpRequests.CountAsync();
+
+            // Assert
+            actualCount.Should().Be(expectedCount);
+        }
+
+        [Test]
+        public async Task DeleteDocumentsAsync_WhenOwnerDeleteDocument_NumberOfDocumentsDecreasesByOne()
+        {
+            // Arrange
+
+            var request =  new List<HelpRequestDocument>()
+            {
+                new HelpRequestDocument()
+                {
+                    Id = "1"
+                }
+            };
+
+            var expectedCount = await _dbContext.HelpRequestDocuments.CountAsync() - 1;
+
+            // Act
+
+            await _helpRequestRepository.DeleteDocumentsAsync(request);
+            var actualCount = await _dbContext.HelpRequestDocuments.CountAsync();
+
+            // Assert
+            actualCount.Should().Be(expectedCount);
+        }
+
+        [Test]
+        public async Task AddDocumentsAsync_WhenOwnerDeleteDocument_NumberOfDocumentsIncreasesByOne()
+        {
+            // Arrange
+
+            var request = new List<HelpRequestDocument>()
+            {
+                new HelpRequestDocument()
+                {
+                    Id = "4",
+                    FilePath = "Path",
+                    HelpRequestId = "1"
+                }
+            };
+
+            var expectedCount = await _dbContext.HelpRequestDocuments.CountAsync() + 1;
+
+            // Act
+
+            await _helpRequestRepository.AddDocumentsAsync(request);
+            var actualCount = await _dbContext.HelpRequestDocuments.CountAsync();
 
             // Assert
             actualCount.Should().Be(expectedCount);
