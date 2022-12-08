@@ -26,6 +26,7 @@ public static class DataLayerRegistration
 
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped<IHelpRequestRepository, HelpRequestRepository>();
+        services.AddScoped<IHelpSeekerRepository, HelpSeekerRepository>();
 
         return services;
     }
