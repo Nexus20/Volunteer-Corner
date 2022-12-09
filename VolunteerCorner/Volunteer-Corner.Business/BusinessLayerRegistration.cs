@@ -23,6 +23,7 @@ public static class BusinessLayerRegistration
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ISignInService, SignInService>();
         services.AddScoped<IHelpRequestService, HelpRequestService>();
+        services.AddScoped<IHelpSeekerService, HelpSeekerService>();
         services.AddScoped<JwtHandler>();
         
         var blobStorageConnectionString = configuration.GetValue<string>("BlobStorageSettings:ConnectionString");

@@ -6,6 +6,7 @@ using Volunteer_Corner.Business;
 using Volunteer_Corner.Business.Interfaces.Services;
 using Volunteer_Corner.Business.Models.Requests.Auth;
 using Volunteer_Corner.Business.Models.Requests.HelpRequests;
+using Volunteer_Corner.Business.Models.Requests.HelpSeekers;
 using Volunteer_Corner.Business.Models.Requests.Users;
 using Volunteer_Corner.Business.Models.Results;
 using Volunteer_Corner.Business.Models.Results.HelpRequests;
@@ -24,6 +25,34 @@ public class HelpSeekersController : ControllerBase
     {
         _helpSeekerService = helpSeekerService;
         _helpRequestService = helpRequestService;
+    }
+    
+    [HttpGet]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(IEnumerable<HelpSeekerResult>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> Get([FromQuery] GetAllHelpSeekersRequest request)
+    {
+        var result = await _helpSeekerService.GetAllHelpSeekers(request);
+        return Ok(result);
+    }
+
+    // GET: api/HelpSeekers/5
+    [HttpGet("{id}", Name = "Get help seeker by id")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(HelpSeekerResult), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetById(string id)
+    {
+        var result = await _helpSeekerService.GetHelpSeekerById(id);
+        return Ok(result);
+    }
+
+    [HttpPatch("{helpSeekerId}/[action]")]
+    [Authorize(Roles = $"{CustomRoles.AdminRole},{CustomRoles.SuperAdminRole}")]
+    [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ChangeApprovalStatus(string helpSeekerId)
+    {
+        var result = await _helpSeekerService.ChangeApprovalStatus(helpSeekerId);
+        return Ok(result);
     }
 
     [HttpGet("[action]", Name = "Get all help seeker's requests")]
