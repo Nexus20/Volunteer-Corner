@@ -4,11 +4,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Volunteer_Corner.Business;
 using Volunteer_Corner.Business.Interfaces.Services;
-using Volunteer_Corner.Business.Models.Requests.Auth;
 using Volunteer_Corner.Business.Models.Requests.HelpRequests;
 using Volunteer_Corner.Business.Models.Requests.HelpSeekers;
-using Volunteer_Corner.Business.Models.Requests.Users;
-using Volunteer_Corner.Business.Models.Results;
 using Volunteer_Corner.Business.Models.Results.HelpRequests;
 
 namespace Volunteer_Corner.API.Controllers;
@@ -26,13 +23,19 @@ public class HelpSeekersController : ControllerBase
         _helpSeekerService = helpSeekerService;
         _helpRequestService = helpRequestService;
     }
-    
+
     [HttpGet]
     [AllowAnonymous]
     [ProducesResponseType(typeof(IEnumerable<HelpSeekerResult>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Get([FromQuery] GetAllHelpSeekersRequest request)
     {
         var result = await _helpSeekerService.GetAllHelpSeekers(request);
+
+        if (User.Identity is { IsAuthenticated: false })
+        {
+            result.ForEach(x => { x.HideContacts(); });
+        }
+
         return Ok(result);
     }
 
@@ -43,6 +46,12 @@ public class HelpSeekersController : ControllerBase
     public async Task<IActionResult> GetById(string id)
     {
         var result = await _helpSeekerService.GetHelpSeekerById(id);
+
+        if (User.Identity is { IsAuthenticated: false })
+        {
+            result.HideContacts();
+        }
+
         return Ok(result);
     }
 
@@ -63,11 +72,12 @@ public class HelpSeekersController : ControllerBase
 
         if (string.IsNullOrWhiteSpace(helpSeekerId))
             return Forbid();
-            
+
         var result = await _helpRequestService.GetAllHelpRequests(new GetAllHelpRequestsRequest()
         {
             OwnerId = helpSeekerId
         });
+        
         return Ok(result);
     }
 }
