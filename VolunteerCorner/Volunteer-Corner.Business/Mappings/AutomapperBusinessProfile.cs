@@ -21,7 +21,9 @@ public class AutomapperBusinessProfile : Profile
         CreateMap<User, UserResult>();
 
         CreateMap<HelpRequest, HelpRequestResult>();
-            // .ForMember(x => x.AdditionalDocuments, o => o.Condition(s => s.AdditionalDocuments?.Any() == true));
+        // .ForMember(x => x.AdditionalDocuments, o => o.Condition(s => s.AdditionalDocuments?.Any() == true));
+        
+        CreateMap<HelpRequest, HelpRequestWithHelpResponsesResult>();
         
         CreateMap<HelpSeeker, HelpSeekerResult>()
             .ForMember(x => x.ContactsDisplayPolicy, o => o.MapFrom(s => s.User.ContactsDisplayPolicy))

@@ -4,5 +4,5 @@ namespace Volunteer_Corner.Data.Interfaces;
 
 public interface IHelpRequestResponseRepository : IRepository<HelpRequestResponse>
 {
-    public Task<HelpRequestResponse?> GetByIdWithDetailsAsync(string id);
+    Task<HelpRequestResponse?> GetByIdWithDetailsAsync(string id);
 }
