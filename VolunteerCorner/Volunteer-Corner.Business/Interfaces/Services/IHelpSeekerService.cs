@@ -7,4 +7,5 @@ public interface IHelpSeekerService
 {
     Task<List<HelpSeekerResult>> GetAllHelpSeekers(GetAllHelpSeekersRequest request);
     Task<HelpSeekerResult> GetHelpSeekerById(string helpSeekerId);
+    Task<bool> ChangeApprovalStatus(string helpSeekerId);
 }

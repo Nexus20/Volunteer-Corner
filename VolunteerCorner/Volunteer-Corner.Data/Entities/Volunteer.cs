@@ -8,4 +8,5 @@ public class Volunteer : BaseEntity
     public string UserId { get; set; } = null!;
     public virtual User User { get; set; } = null!;
     public virtual List<HelpProposal>? HelpProposals { get; set; }
+    public bool IsApproved { get; set; }
 }
