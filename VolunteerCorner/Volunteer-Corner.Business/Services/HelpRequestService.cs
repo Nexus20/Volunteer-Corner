@@ -24,9 +24,12 @@ public class HelpRequestService : IHelpRequestService
     private readonly ILogger<HelpRequestService> _logger;
     private readonly IFileStorageService _fileStorageService;
     private readonly IRepository<HelpProposal> _helpProposalRepository;
-    private readonly IRepository<HelpRequestResponse> _helpRequestResponseRepository;
+    private readonly IHelpRequestResponseRepository _helpRequestResponseRepository;
 
-    public HelpRequestService(IHelpRequestRepository helpRequestRepository, IMapper mapper, IRepository<HelpSeeker> helpSeekerRepository, ILogger<HelpRequestService> logger, IFileStorageService fileStorageService, IRepository<HelpProposal> helpProposalRepository, IRepository<HelpRequestResponse> helpRequestResponseRepository)
+    public HelpRequestService(IHelpRequestRepository helpRequestRepository, IMapper mapper,
+        IRepository<HelpSeeker> helpSeekerRepository, ILogger<HelpRequestService> logger,
+        IFileStorageService fileStorageService, IRepository<HelpProposal> helpProposalRepository,
+        IHelpRequestResponseRepository helpRequestResponseRepository)
     {
         _helpRequestRepository = helpRequestRepository;
         _mapper = mapper;
@@ -216,7 +219,7 @@ public class HelpRequestService : IHelpRequestService
         return request.NewStatus;
     }
     
-    public async Task<object?> CreateResponseAsync(string id, string volunteerId, AddHelpRequestResponseRequest request)
+    public async Task<HelpRequestResponseResult> CreateResponseAsync(string id, string volunteerId, AddHelpRequestResponseRequest request)
     {
         var helpRequest = await _helpRequestRepository.GetByIdAsync(id);
         
@@ -235,18 +238,27 @@ public class HelpRequestService : IHelpRequestService
         
         if (!string.IsNullOrWhiteSpace(request.IncludedHelpProposalId))
         {
-            var helpProposalExists =
-                await _helpProposalRepository.ExistsAsync(x => x.Id == request.IncludedHelpProposalId);
+            var helpProposalToInclude = await _helpProposalRepository.GetByIdAsync(request.IncludedHelpProposalId);
             
-            if(!helpProposalExists)
+            if(helpProposalToInclude == null)
                 throw new ValidationException("Help proposal you want to add to your response doesn't exist");
+
+            if (helpProposalToInclude.OwnerId != volunteerId)
+                throw new ValidationException("You can't add not your own help proposals");
+
+            var helpProposalAlreadyIncluded = await _helpRequestResponseRepository.ExistsAsync(x =>
+                x.HelpRequestToId == id && x.IncludedHelpProposalId == request.IncludedHelpProposalId);
+
+            if (helpProposalAlreadyIncluded)
+                throw new ValidationException("Help proposal you want to include is already included");
 
             responseEntity.IncludedHelpProposalId = request.IncludedHelpProposalId;
         }
 
         await _helpRequestResponseRepository.AddAsync(responseEntity);
         _logger.LogInformation("New response to help request {HelpRequestId} has been successfully added. Response id: {HelpRequestResponseId}", id, responseEntity.Id);
-        var result = _mapper.Map<HelpRequestResponse, HelpRequestResponseResult>(responseEntity);
+        var source = await _helpRequestResponseRepository.GetByIdWithDetailsAsync(responseEntity.Id);
+        var result = _mapper.Map<HelpRequestResponse, HelpRequestResponseResult>(source!);
         return result;
     }
 

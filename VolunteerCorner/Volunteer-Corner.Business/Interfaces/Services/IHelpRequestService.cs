@@ -16,5 +16,5 @@ public interface IHelpRequestService
     Task<HelpRequestResult> UpdateAsync(string id, UpdateHelpRequestRequest request);
     Task DeleteDocumentsAsync(string id, DeleteHelpRequestDocumentsRequest request);
     Task<List<HelpRequestDocumentResult>> AddDocumentsAsync(string id, List<FileDto> filesDtos);
-    Task<object?> CreateResponseAsync(string id, string volunteerId, AddHelpRequestResponseRequest request);
+    Task<HelpRequestResponseResult> CreateResponseAsync(string id, string volunteerId, AddHelpRequestResponseRequest request);
 }

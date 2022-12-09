@@ -13,3 +13,8 @@ public class HelpRequestResult : BaseResult
     public HelpRequestStatus Status { get; set; }
     public List<HelpRequestDocumentResult>? AdditionalDocuments { get; set; }
 }
+
+public class HelpRequestWithHelpResponsesResult : HelpRequestResult
+{
+    public List<HelpRequestResponseResult>? Responses;
+}
