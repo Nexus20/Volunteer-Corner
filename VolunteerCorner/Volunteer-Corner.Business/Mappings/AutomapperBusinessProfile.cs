@@ -19,6 +19,7 @@ public class AutomapperBusinessProfile : Profile
 
         CreateMap<HelpRequest, HelpRequestResult>();
         CreateMap<HelpSeeker, HelpSeekerResult>()
+            .ForMember(x => x.ContactsDisplayPolicy, o => o.MapFrom(s => s.User.ContactsDisplayPolicy))
             .ForMember(x => x.FirstName, o => o.MapFrom(s => s.User.FirstName))
             .ForMember(x => x.LastName, o => o.MapFrom(s => s.User.LastName))
             .ForMember(x => x.Patronymic, o => o.MapFrom(s => s.User.Patronymic))

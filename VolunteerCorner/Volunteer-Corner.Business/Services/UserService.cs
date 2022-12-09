@@ -10,6 +10,7 @@ using Volunteer_Corner.Business.Models.Results;
 using Volunteer_Corner.Data;
 using Volunteer_Corner.Data.Entities;
 using Volunteer_Corner.Data.Entities.Identity;
+using Volunteer_Corner.Data.Enums;
 
 namespace Volunteer_Corner.Business.Services;
 
@@ -107,5 +108,22 @@ public class UserService : IUserService
         
         var result = _mapper.Map<User, UserResult>(userToUpdate);
         return result;
+    }
+
+    public async Task<ContactsDisplayPolicy> AdjustContactsDisplaying(string userId, AdjustContactsDisplaying request)
+    {
+        var userToUpdate = await _userManager.FindByIdAsync(userId);
+
+        if (userToUpdate == null)
+            throw new NotFoundException(nameof(User), userId);
+
+        userToUpdate.ContactsDisplayPolicy = request.NewPolicy;
+        var identityResult = await _userManager.UpdateAsync(userToUpdate);
+        
+        if(identityResult.Errors.Any())
+            throw new IdentityException(identityResult.Errors);
+        
+        _logger.LogInformation("User {UserId} has successfully updated contacts displaying policy to {NewPolicy}", userId, request.NewPolicy.ToString());
+        return request.NewPolicy;
     }
 }

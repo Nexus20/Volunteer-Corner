@@ -1,13 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Volunteer_Corner.Business.Models.Requests.HelpRequests
+namespace Volunteer_Corner.Business.Models.Requests.HelpRequests;
+
+public class UpdateHelpRequestRequest
 {
-    public class UpdateHelpRequestRequest
-    {
-        [Required]
-        public string Name { get; set; } = null!;
-        [Required]
-        public string Location { get; set; } = null!;
-        public string? Description { get; set; }
-    }
+    [Required]
+    public string Name { get; set; } = null!;
+    [Required]
+    public string Location { get; set; } = null!;
+    public string? Description { get; set; }
 }
