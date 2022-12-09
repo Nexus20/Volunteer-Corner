@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Volunteer_Corner.Data.Entities.Identity;
+using Volunteer_Corner.Data.Enums;
+
 
 namespace Volunteer_Corner.Data.EntityConfigurations;
 
@@ -17,5 +19,8 @@ internal class UserConfiguration : IEntityTypeConfiguration<User>
             .WithOne(x => x.User)
             .HasForeignKey(x => x.UserId)
             .IsRequired();
+
+        builder.Property(x => x.ContactsDisplayPolicy)
+            .HasDefaultValue(ContactsDisplayPolicy.AllowAll);
     }
 }

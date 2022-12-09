@@ -1,4 +1,6 @@
-﻿namespace Volunteer_Corner.Business.Models.Results;
+﻿using Volunteer_Corner.Data.Enums;
+
+namespace Volunteer_Corner.Business.Models.Results;
 
 public class UserResult
 {
@@ -8,4 +10,5 @@ public class UserResult
     public string PhoneNumber { get; set; }
     public string FirstName { get; set; } = null!;
     public string LastName { get; set; } = null!;
+    public ContactsDisplayPolicy ContactsDisplayPolicy { get; set; }
 }

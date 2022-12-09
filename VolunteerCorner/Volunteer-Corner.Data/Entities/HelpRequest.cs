@@ -13,3 +13,15 @@ public class HelpRequest : BaseEntity
     public HelpRequestStatus Status { get; set; }
     public virtual List<HelpRequestDocument>? AdditionalDocuments { get; set; }
 }
+
+// public class HelpRequestResponse : BaseEntity
+// {
+//     public string HelpSeekerId { get; set; } = null!;
+//     public virtual HelpSeeker HelpSeeker { get; set; } = null!;
+//     public string VolunteerId { get; set; } = null!;
+//     public virtual Volunteer Volunteer { get; set; } = null!;
+//     public string Comment { get; set; } = null!;
+//
+//     public string? HelpProposalId { get; set; }
+//     public virtual HelpProposal? HelpProposal { get; set; }
+// }
