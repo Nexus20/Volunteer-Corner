@@ -1,5 +1,5 @@
 ﻿using Volunteer_Corner.Business.Models.Requests.HelpSeekers;
-using Volunteer_Corner.Business.Models.Results.HelpRequests;
+using Volunteer_Corner.Business.Models.Results.HelpSeekers;
 
 namespace Volunteer_Corner.Business.Interfaces.Services;
 

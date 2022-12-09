@@ -18,6 +18,8 @@ public interface IRepository<TEntity> where TEntity : BaseEntity
         List<Expression<Func<TEntity, object>>>? includes = null,
         bool disableTracking = true);
 
+    Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate);
+
     Task<TEntity?> GetByIdAsync(string id);
     Task<TEntity> AddAsync(TEntity entity);
     Task UpdateAsync(TEntity entity);

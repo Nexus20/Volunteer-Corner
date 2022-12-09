@@ -92,4 +92,9 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEnti
         Db.Set<TEntity>().Remove(entity);
         await Db.SaveChangesAsync();
     }
+    
+    public Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate)
+    {
+        return Db.Set<TEntity>().AnyAsync(predicate);
+    }
 }

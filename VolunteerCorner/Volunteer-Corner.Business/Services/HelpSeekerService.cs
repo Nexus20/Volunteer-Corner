@@ -5,7 +5,7 @@ using Volunteer_Corner.Business.Exceptions;
 using Volunteer_Corner.Business.Infrastructure.Expressions;
 using Volunteer_Corner.Business.Interfaces.Services;
 using Volunteer_Corner.Business.Models.Requests.HelpSeekers;
-using Volunteer_Corner.Business.Models.Results.HelpRequests;
+using Volunteer_Corner.Business.Models.Results.HelpSeekers;
 using Volunteer_Corner.Data.Entities;
 using Volunteer_Corner.Data.Interfaces;
 
