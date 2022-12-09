@@ -16,5 +16,10 @@ internal class HelpSeekerConfiguration : IEntityTypeConfiguration<HelpSeeker>
             .WithOne(x => x.Owner)
             .HasForeignKey(x => x.OwnerId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasMany(x => x.HelpProposalResponses)
+            .WithOne(x => x.HelpSeekerFrom)
+            .HasForeignKey(x => x.HelpSeekerFromId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

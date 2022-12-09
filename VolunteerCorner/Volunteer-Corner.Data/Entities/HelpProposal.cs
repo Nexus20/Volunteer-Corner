@@ -13,4 +13,6 @@ public class HelpProposal : BaseEntity
     
     public HelpProposalStatus Status { get; set; }
     public virtual List<HelpProposalPhoto>? AdditionalPhotos { get; set; }
+    public virtual List<HelpProposalResponse>? Responses { get; set; }
+    public virtual List<HelpRequestResponse>? IncludedToHelpRequestResponses { get; set; }
 }
