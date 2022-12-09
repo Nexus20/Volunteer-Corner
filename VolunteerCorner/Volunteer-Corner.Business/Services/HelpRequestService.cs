@@ -23,14 +23,21 @@ public class HelpRequestService : IHelpRequestService
     private readonly IRepository<HelpSeeker> _helpSeekerRepository;
     private readonly ILogger<HelpRequestService> _logger;
     private readonly IFileStorageService _fileStorageService;
+    private readonly IRepository<HelpProposal> _helpProposalRepository;
+    private readonly IHelpRequestResponseRepository _helpRequestResponseRepository;
 
-    public HelpRequestService(IHelpRequestRepository helpRequestRepository, IMapper mapper, IRepository<HelpSeeker> helpSeekerRepository, ILogger<HelpRequestService> logger, IFileStorageService fileStorageService)
+    public HelpRequestService(IHelpRequestRepository helpRequestRepository, IMapper mapper,
+        IRepository<HelpSeeker> helpSeekerRepository, ILogger<HelpRequestService> logger,
+        IFileStorageService fileStorageService, IRepository<HelpProposal> helpProposalRepository,
+        IHelpRequestResponseRepository helpRequestResponseRepository)
     {
         _helpRequestRepository = helpRequestRepository;
         _mapper = mapper;
         _helpSeekerRepository = helpSeekerRepository;
         _logger = logger;
         _fileStorageService = fileStorageService;
+        _helpProposalRepository = helpProposalRepository;
+        _helpRequestResponseRepository = helpRequestResponseRepository;
     }
 
     public async Task<List<HelpRequestResult>> GetAllHelpRequests(GetAllHelpRequestsRequest request)
@@ -136,52 +143,6 @@ public class HelpRequestService : IHelpRequestService
         return result;
     }
 
-    public async Task<List<HelpRequestDocumentResult>> AddDocumentsAsync(string id, IFormFileCollection files, string directoryToSave)
-    {
-        var helpRequestToUpdate = await _helpRequestRepository.GetByIdAsync(id);
-
-        if (helpRequestToUpdate == null)
-            throw new NotFoundException(nameof(HelpRequest), id);
-
-        if (helpRequestToUpdate.AdditionalDocuments?.Any() == false)
-        {
-            helpRequestToUpdate.AdditionalDocuments = new List<HelpRequestDocument>();
-        }
-
-        foreach (var file in files)
-        {
-            var folderName = Path.Combine("Resources", "Documents", helpRequestToUpdate.Id);
-            var pathToSave = Path.Combine(directoryToSave, folderName);
-
-            if (!Directory.Exists(pathToSave))
-            {
-                var dirInfo = new DirectoryInfo(pathToSave);
-                dirInfo.Create();
-            }
-
-            if (file.Length <= 0) continue;
-            
-            var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
-            var fullPath = Path.Combine(pathToSave, fileName);
-            var dbPath = Path.Combine(folderName, fileName);
-
-            await using (var stream = new FileStream(fullPath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-
-            helpRequestToUpdate.AdditionalDocuments.Add(new HelpRequestDocument()
-            {
-                FilePath = dbPath,
-                HelpRequestId = helpRequestToUpdate.Id,
-            });
-        }
-
-        await _helpRequestRepository.AddDocumentsAsync(helpRequestToUpdate.AdditionalDocuments);
-        var result = _mapper.Map<List<HelpRequestDocument>, List<HelpRequestDocumentResult>>(helpRequestToUpdate.AdditionalDocuments);
-        return result;
-    }
-
     public async Task<HelpRequestResult> CreateAsync(CreateHelpRequestRequest request, string helpRequestOwnerId,
         IFormFileCollection files, string directoryToSave)
     {
@@ -257,8 +218,51 @@ public class HelpRequestService : IHelpRequestService
         _logger.LogInformation("Request #{RequestId} has been updated with new status: {RequestNewStatus}", id, request.NewStatus);
         return request.NewStatus;
     }
+    
+    public async Task<HelpRequestResponseResult> CreateResponseAsync(string id, string volunteerId, AddHelpRequestResponseRequest request)
+    {
+        var helpRequest = await _helpRequestRepository.GetByIdAsync(id);
+        
+        if (helpRequest == null)
+            throw new NotFoundException(nameof(HelpRequest), id);
+        
+        if (helpRequest.Status is HelpRequestStatus.Closed or HelpRequestStatus.Canceled)
+            throw new ValidationException("You can't add response to canceled or closed request");
 
-    private Expression<Func<HelpRequest, bool>>? CreateFilterPredicate(GetAllHelpRequestsRequest request)
+        var responseEntity = new HelpRequestResponse()
+        {
+            Comment = request.Comment,
+            VolunteerFromId = volunteerId,
+            HelpRequestToId = id
+        };
+        
+        if (!string.IsNullOrWhiteSpace(request.IncludedHelpProposalId))
+        {
+            var helpProposalToInclude = await _helpProposalRepository.GetByIdAsync(request.IncludedHelpProposalId);
+            
+            if(helpProposalToInclude == null)
+                throw new ValidationException("Help proposal you want to add to your response doesn't exist");
+
+            if (helpProposalToInclude.OwnerId != volunteerId)
+                throw new ValidationException("You can't add not your own help proposals");
+
+            var helpProposalAlreadyIncluded = await _helpRequestResponseRepository.ExistsAsync(x =>
+                x.HelpRequestToId == id && x.IncludedHelpProposalId == request.IncludedHelpProposalId);
+
+            if (helpProposalAlreadyIncluded)
+                throw new ValidationException("Help proposal you want to include is already included");
+
+            responseEntity.IncludedHelpProposalId = request.IncludedHelpProposalId;
+        }
+
+        await _helpRequestResponseRepository.AddAsync(responseEntity);
+        _logger.LogInformation("New response to help request {HelpRequestId} has been successfully added. Response id: {HelpRequestResponseId}", id, responseEntity.Id);
+        var source = await _helpRequestResponseRepository.GetByIdWithDetailsAsync(responseEntity.Id);
+        var result = _mapper.Map<HelpRequestResponse, HelpRequestResponseResult>(source!);
+        return result;
+    }
+
+    private static Expression<Func<HelpRequest, bool>>? CreateFilterPredicate(GetAllHelpRequestsRequest request)
     {
         Expression<Func<HelpRequest, bool>>? predicate = null;
 

@@ -67,6 +67,16 @@ public class HelpRequestRepository : Repository<HelpRequest>, IHelpRequestReposi
         await Db.SaveChangesAsync();
     }
 
+    public Task<HelpRequest?> GetByIdWithResponsesAsync(string id)
+    {
+        return Db.HelpRequests
+            .Include(x => x.Owner)
+            .ThenInclude(x => x.User)
+            .Include(x => x.AdditionalDocuments)
+            .Include(x => x.Responses)
+            .FirstOrDefaultAsync(x => x.Id == id);
+    }
+
     public override Task<HelpRequest?> GetByIdAsync(string id)
     {
         return Db.HelpRequests.AsNoTracking()

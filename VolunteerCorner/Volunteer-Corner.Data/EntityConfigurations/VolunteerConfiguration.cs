@@ -16,5 +16,10 @@ internal class VolunteerConfiguration : IEntityTypeConfiguration<Volunteer>
             .WithOne(x => x.Owner)
             .HasForeignKey(x => x.OwnerId)
             .OnDelete(DeleteBehavior.Restrict);
+        
+        builder.HasMany(x => x.HelpRequestResponses)
+            .WithOne(x => x.VolunteerFrom)
+            .HasForeignKey(x => x.VolunteerFromId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

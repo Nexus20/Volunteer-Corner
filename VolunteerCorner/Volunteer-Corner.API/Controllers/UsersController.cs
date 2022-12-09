@@ -2,13 +2,10 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Volunteer_Corner.Business;
 using Volunteer_Corner.Business.Interfaces.Services;
 using Volunteer_Corner.Business.Models.Requests.Auth;
-using Volunteer_Corner.Business.Models.Requests.HelpRequests;
 using Volunteer_Corner.Business.Models.Requests.Users;
 using Volunteer_Corner.Business.Models.Results;
-using Volunteer_Corner.Business.Models.Results.HelpRequests;
 
 namespace Volunteer_Corner.API.Controllers;
 

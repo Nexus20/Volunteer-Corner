@@ -12,5 +12,15 @@ internal class HelpProposalConfiguration : IEntityTypeConfiguration<HelpProposal
             .WithOne(x => x.HelpProposal)
             .HasForeignKey(x => x.HelpProposalId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasMany(x => x.Responses)
+            .WithOne(x => x.HelpProposalTo)
+            .HasForeignKey(x => x.HelpProposalToId)
+            .OnDelete(DeleteBehavior.Restrict);
+        
+        builder.HasMany(x => x.IncludedToHelpRequestResponses)
+            .WithOne(x => x.IncludedHelpProposal)
+            .HasForeignKey(x => x.IncludedHelpProposalId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

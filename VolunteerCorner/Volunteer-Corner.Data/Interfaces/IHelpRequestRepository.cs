@@ -10,4 +10,5 @@ public interface IHelpRequestRepository : IRepository<HelpRequest>
         bool disableTracking = true);
     public Task DeleteDocumentsAsync(List<HelpRequestDocument> documentsToRemove);
     public Task AddDocumentsAsync(List<HelpRequestDocument> documentsToAdd);
+    Task<HelpRequest?> GetByIdWithResponsesAsync(string id);
 }

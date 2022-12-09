@@ -20,6 +20,8 @@ public class ApplicationDbContext : IdentityDbContext<User, Role, string, Identi
     public DbSet<Volunteer> Volunteers { get; set; }
     public DbSet<HelpProposal> HelpProposals { get; set; }
     public DbSet<HelpProposalPhoto> HelpProposalPhotos { get; set; }
+    public DbSet<HelpProposalResponse> HelpProposalResponses { get; set; }
+    public DbSet<HelpRequestResponse> HelpRequestResponses { get; set; }
 
     public ApplicationDbContext(DbContextOptions options) : base(options)
     {

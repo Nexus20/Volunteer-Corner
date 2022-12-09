@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Volunteer_Corner.Business;
 using Volunteer_Corner.Business.Interfaces.Services;
-using Volunteer_Corner.Business.Models.Requests.HelpRequests;
 using Volunteer_Corner.Business.Models.Requests.HelpSeekers;
 using Volunteer_Corner.Business.Models.Results.HelpRequests;
+using Volunteer_Corner.Business.Models.Results.HelpSeekers;
 
 namespace Volunteer_Corner.API.Controllers;
 
@@ -73,10 +73,21 @@ public class HelpSeekersController : ControllerBase
         if (string.IsNullOrWhiteSpace(helpSeekerId))
             return Forbid();
 
-        var result = await _helpRequestService.GetAllHelpRequests(new GetAllHelpRequestsRequest()
-        {
-            OwnerId = helpSeekerId
-        });
+        var result = await _helpSeekerService.GetOwnHelpRequestsAsync(helpSeekerId);
+        
+        return Ok(result);
+    }
+    
+    [HttpGet("[action]/{helpRequestId}", Name = "Get help seeker's request by id")]
+    [ProducesResponseType(typeof(List<HelpRequestResult>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetOwnHelpRequest(string helpRequestId)
+    {
+        var helpSeekerId = User.FindFirstValue(CustomClaimTypes.HelpSeekerId);
+
+        if (string.IsNullOrWhiteSpace(helpSeekerId))
+            return Forbid();
+
+        var result = await _helpSeekerService.GetOwnHelpRequestByIdAsync(helpSeekerId, helpRequestId);
         
         return Ok(result);
     }

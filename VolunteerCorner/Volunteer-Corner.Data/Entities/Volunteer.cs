@@ -9,4 +9,5 @@ public class Volunteer : BaseEntity
     public virtual User User { get; set; } = null!;
     public virtual List<HelpProposal>? HelpProposals { get; set; }
     public bool IsApproved { get; set; }
+    public virtual List<HelpRequestResponse>? HelpRequestResponses { get; set; }
 }

@@ -6,6 +6,7 @@ using Volunteer_Corner.Business.Infrastructure.Expressions;
 using Volunteer_Corner.Business.Interfaces.Services;
 using Volunteer_Corner.Business.Models.Requests.HelpSeekers;
 using Volunteer_Corner.Business.Models.Results.HelpRequests;
+using Volunteer_Corner.Business.Models.Results.HelpSeekers;
 using Volunteer_Corner.Data.Entities;
 using Volunteer_Corner.Data.Interfaces;
 
@@ -15,14 +16,16 @@ public class HelpSeekerService : IHelpSeekerService
 {
     private readonly IMapper _mapper;
     private readonly IHelpSeekerRepository _helpSeekerRepository;
+    private readonly IHelpRequestRepository _helpRequestRepository;
     private readonly ILogger<HelpSeekerService> _logger;
 
     public HelpSeekerService(IMapper mapper, IHelpSeekerRepository helpSeekerRepository,
-        ILogger<HelpSeekerService> logger)
+        ILogger<HelpSeekerService> logger, IHelpRequestRepository helpRequestRepository)
     {
         _mapper = mapper;
         _helpSeekerRepository = helpSeekerRepository;
         _logger = logger;
+        _helpRequestRepository = helpRequestRepository;
     }
 
     public async Task<List<HelpSeekerResult>> GetAllHelpSeekers(GetAllHelpSeekersRequest request)
@@ -66,6 +69,28 @@ public class HelpSeekerService : IHelpSeekerService
         await _helpSeekerRepository.UpdateAsync(helpSeekerToUpdate);
         _logger.LogInformation("Status of the help seeker profile #{HelpSeekerId} approval was changed to {NewApprovalStatus}", helpSeekerToUpdate.Id, helpSeekerToUpdate.IsApproved.ToString());
         return helpSeekerToUpdate.IsApproved;
+    }
+
+    public async Task<List<HelpRequestResult>> GetOwnHelpRequestsAsync(string helpSeekerId)
+    {
+        var source = await _helpRequestRepository.GetAsync(x => x.OwnerId == helpSeekerId, disableTracking: false);
+
+        var result = _mapper.Map<List<HelpRequest>, List<HelpRequestResult>>(source);
+        return result;
+    }
+    
+    public async Task<HelpRequestWithHelpResponsesResult> GetOwnHelpRequestByIdAsync(string helpSeekerId, string helpRequestId)
+    {
+        var helpRequest = await _helpRequestRepository.GetByIdWithResponsesAsync(helpRequestId);
+        
+        if (helpRequest == null)
+            throw new NotFoundException(nameof(helpRequest), helpRequestId);
+
+        if (helpRequest.OwnerId != helpSeekerId)
+            throw new ValidationException("Owner id and help seeker id don't match");
+
+        var result = _mapper.Map<HelpRequest, HelpRequestWithHelpResponsesResult>(helpRequest);
+        return result;
     }
 
     private static Expression<Func<HelpSeeker, bool>>? CreateFilterPredicate(GetAllHelpSeekersRequest request)

@@ -1,9 +1,9 @@
 ﻿using Volunteer_Corner.Business.Models.Results.Abstract;
 using Volunteer_Corner.Data.Enums;
 
-namespace Volunteer_Corner.Business.Models.Results.HelpRequests;
+namespace Volunteer_Corner.Business.Models.Results.Volunteers;
 
-public class HelpSeekerResult : BaseResult
+public class VolunteerResult : BaseResult
 {
     public string FirstName { get; set; } = null!;
     public string LastName { get; set; } = null!;
