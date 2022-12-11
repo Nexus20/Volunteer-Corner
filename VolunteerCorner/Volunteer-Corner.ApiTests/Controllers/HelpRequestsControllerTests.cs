@@ -72,7 +72,7 @@ public class HelpRequestsControllerTest
             .ReturnsAsync(result);
 
         // Act
-        var actualResult = await _helpRequestsController.Get(string.Empty) as OkObjectResult;
+        var actualResult = await _helpRequestsController.Get(Mock.Of<GetAllHelpRequestsRequest>()) as OkObjectResult;
 
         //Assert
         actualResult.Should().NotBeNull();

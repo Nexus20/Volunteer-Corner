@@ -1,7 +1,5 @@
 ﻿using System.Linq.Expressions;
-using System.Net.Http.Headers;
 using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Volunteer_Corner.Business.Exceptions;
 using Volunteer_Corner.Business.Infrastructure.Expressions;
@@ -143,8 +141,7 @@ public class HelpRequestService : IHelpRequestService
         return result;
     }
 
-    public async Task<HelpRequestResult> CreateAsync(CreateHelpRequestRequest request, string helpRequestOwnerId,
-        IFormFileCollection files, string directoryToSave)
+    public async Task<HelpRequestResult> CreateAsync(CreateHelpRequestRequest request, string helpRequestOwnerId)
     {
         var owner = await _helpSeekerRepository.GetByIdAsync(helpRequestOwnerId);
 
@@ -156,41 +153,6 @@ public class HelpRequestService : IHelpRequestService
         var helpRequest = _mapper.Map<CreateHelpRequestRequest, HelpRequest>(request);
         helpRequest.Owner = owner;
         helpRequest.Status = HelpRequestStatus.Active;
-
-        if (files?.Any() == true)
-        {
-            helpRequest.AdditionalDocuments = new List<HelpRequestDocument>();
-            
-            foreach (var file in files)
-            {
-                var folderName = Path.Combine("Resources", "Documents", helpRequest.Id);
-                var pathToSave = Path.Combine(directoryToSave, folderName);
-
-                if (!Directory.Exists(pathToSave))
-                {
-                    var dirInfo = new DirectoryInfo(pathToSave);
-                    dirInfo.Create();
-                }
-                
-                if (file.Length > 0)
-                {
-                    var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
-                    var fullPath = Path.Combine(pathToSave, fileName);
-                    var dbPath = Path.Combine(folderName, fileName);
-                    
-                    await using (var stream = new FileStream(fullPath, FileMode.Create))
-                    {
-                        await file.CopyToAsync(stream);
-                    }
-                    
-                    helpRequest.AdditionalDocuments.Add(new HelpRequestDocument()
-                    {
-                        FilePath = dbPath,
-                        HelpRequestId = helpRequest.Id,
-                    });
-                }
-            }
-        }
 
         await _helpRequestRepository.AddAsync(helpRequest);
         

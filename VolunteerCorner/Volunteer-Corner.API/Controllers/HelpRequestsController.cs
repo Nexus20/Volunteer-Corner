@@ -51,7 +51,7 @@ public class HelpRequestsController : ControllerBase
         if (string.IsNullOrWhiteSpace(helpRequestOwnerId))
             return Forbid();
 
-        var result = await _helpRequestService.CreateAsync(request, helpRequestOwnerId, Request.Form.Files, Directory.GetCurrentDirectory());
+        var result = await _helpRequestService.CreateAsync(request, helpRequestOwnerId);
 
         return StatusCode(StatusCodes.Status201Created, result);
     }
