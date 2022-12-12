@@ -7,6 +7,7 @@ using Volunteer_Corner.Business.Interfaces.Services;
 using Volunteer_Corner.Business.Models.Requests.Auth;
 using Volunteer_Corner.Business.Models.Requests.Users;
 using Volunteer_Corner.Business.Models.Results;
+using Volunteer_Corner.Business.Models.Results.Users;
 
 namespace Volunteer_Corner.ApiTests.Controllers;
 

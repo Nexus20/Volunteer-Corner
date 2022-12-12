@@ -6,6 +6,7 @@ using Volunteer_Corner.Business.Interfaces.Services;
 using Volunteer_Corner.Business.Models.Requests.Auth;
 using Volunteer_Corner.Business.Models.Requests.Users;
 using Volunteer_Corner.Business.Models.Results;
+using Volunteer_Corner.Business.Models.Results.Users;
 
 namespace Volunteer_Corner.API.Controllers;
 
@@ -40,6 +41,19 @@ public class UsersController : ControllerBase
     {
         var result = await _signInService.SignInAsync(request);
         return result.IsAuthSuccessful ? Ok(result) : Unauthorized(result);
+    }
+
+    [HttpGet("profile")]
+    [ProducesResponseType(typeof(ProfileResult), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetProfile()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized();
+        
+        var result = await _userService.GetProfileAsync(userId);
+        return Ok(result);
     }
 
     [HttpPut("[action]")]

@@ -6,7 +6,7 @@ using Volunteer_Corner.Business.Interfaces.Services;
 using Volunteer_Corner.Business.Models.Enums;
 using Volunteer_Corner.Business.Models.Requests.Auth;
 using Volunteer_Corner.Business.Models.Requests.Users;
-using Volunteer_Corner.Business.Models.Results;
+using Volunteer_Corner.Business.Models.Results.Users;
 using Volunteer_Corner.Data;
 using Volunteer_Corner.Data.Entities;
 using Volunteer_Corner.Data.Entities.Identity;
@@ -125,5 +125,16 @@ public class UserService : IUserService
         
         _logger.LogInformation("User {UserId} has successfully updated contacts displaying policy to {NewPolicy}", userId, request.NewPolicy.ToString());
         return request.NewPolicy;
+    }
+
+    public async Task<ProfileResult> GetProfileAsync(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        
+        if(user == null)
+            throw new NotFoundException(nameof(User), userId);
+
+        var result = _mapper.Map<User, ProfileResult>(user);
+        return result;
     }
 }

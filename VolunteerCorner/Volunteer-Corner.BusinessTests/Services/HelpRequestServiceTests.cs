@@ -1,7 +1,6 @@
 ﻿using System.Linq.Expressions;
 using AutoMapper;
 using FluentAssertions;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -15,7 +14,6 @@ using Volunteer_Corner.Business.Services;
 using Volunteer_Corner.Data.Entities;
 using Volunteer_Corner.Data.Enums;
 using Volunteer_Corner.Data.Interfaces;
-using Volunteer_Corner.Data.Repositories;
 
 namespace Volunteer_Corner.BusinessTests.Services;
 
