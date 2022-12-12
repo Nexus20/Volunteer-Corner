@@ -1,4 +1,4 @@
-﻿using Volunteer_Corner.Business.Models.Results;
+﻿using Volunteer_Corner.Business.Models.Results.Users;
 
 namespace Volunteer_Corner.BusinessTests.EqualityComparers;
 

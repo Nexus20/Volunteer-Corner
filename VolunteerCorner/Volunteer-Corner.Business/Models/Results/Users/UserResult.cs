@@ -1,6 +1,6 @@
 ﻿using Volunteer_Corner.Data.Enums;
 
-namespace Volunteer_Corner.Business.Models.Results;
+namespace Volunteer_Corner.Business.Models.Results.Users;
 
 public class UserResult
 {
