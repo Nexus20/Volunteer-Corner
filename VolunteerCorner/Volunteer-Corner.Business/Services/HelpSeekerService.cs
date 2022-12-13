@@ -5,8 +5,10 @@ using Volunteer_Corner.Business.Exceptions;
 using Volunteer_Corner.Business.Infrastructure.Expressions;
 using Volunteer_Corner.Business.Interfaces.Services;
 using Volunteer_Corner.Business.Models.Requests.HelpSeekers;
+using Volunteer_Corner.Business.Models.Results.Abstract;
 using Volunteer_Corner.Business.Models.Results.HelpRequests;
 using Volunteer_Corner.Business.Models.Results.HelpSeekers;
+using Volunteer_Corner.Data.Dtos;
 using Volunteer_Corner.Data.Entities;
 using Volunteer_Corner.Data.Interfaces;
 
@@ -44,6 +46,15 @@ public class HelpSeekerService : IHelpSeekerService
         }
 
         var result = _mapper.Map<List<HelpSeeker>, List<HelpSeekerResult>>(source);
+        return result;
+    }
+    
+    public async Task<PageResult<HelpSeekerResult>> GetHelpSeekersPage(GetHelpSeekersPageRequest request)
+    {
+        var predicate = CreateFilterPredicate(request);
+        var source = await _helpSeekerRepository.GetPageAsync(request.PageNumber, request.TakeCount, predicate);
+
+        var result = _mapper.Map<PageDto<HelpSeeker>, PageResult<HelpSeekerResult>>(source);
         return result;
     }
 
@@ -93,7 +104,7 @@ public class HelpSeekerService : IHelpSeekerService
         return result;
     }
 
-    private static Expression<Func<HelpSeeker, bool>>? CreateFilterPredicate(GetAllHelpSeekersRequest request)
+    private static Expression<Func<HelpSeeker, bool>>? CreateFilterPredicate(IGetHelpSeekersRequest request)
     {
         Expression<Func<HelpSeeker, bool>>? predicate = null;
 

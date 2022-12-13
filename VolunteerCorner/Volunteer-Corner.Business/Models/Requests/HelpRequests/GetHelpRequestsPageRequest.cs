@@ -1,8 +1,9 @@
-﻿using Volunteer_Corner.Data.Enums;
+﻿using Volunteer_Corner.Business.Models.Requests.Base;
+using Volunteer_Corner.Data.Enums;
 
 namespace Volunteer_Corner.Business.Models.Requests.HelpRequests;
 
-public class GetAllHelpRequestsRequest : IGetHelpRequestsRequest
+public class GetHelpRequestsPageRequest : GetPageRequest, IGetHelpRequestsRequest
 {
     public string? OwnerId { get; set; }
     public string? SearchString { get; set; }

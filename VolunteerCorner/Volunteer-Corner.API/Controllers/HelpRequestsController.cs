@@ -6,6 +6,7 @@ using Volunteer_Corner.Business;
 using Volunteer_Corner.Business.Interfaces.Services;
 using Volunteer_Corner.Business.Models.Dtos.Files;
 using Volunteer_Corner.Business.Models.Requests.HelpRequests;
+using Volunteer_Corner.Business.Models.Results.Abstract;
 using Volunteer_Corner.Business.Models.Results.HelpRequests;
 
 namespace Volunteer_Corner.API.Controllers;
@@ -28,6 +29,14 @@ public class HelpRequestsController : ControllerBase
     public async Task<IActionResult> Get([FromQuery] GetAllHelpRequestsRequest request)
     {
         var result = await _helpRequestService.GetAllHelpRequests(request);
+        return Ok(result);
+    }
+    
+    [HttpGet("page")]
+    [ProducesResponseType(typeof(PageResult<HelpRequestResult>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetPage([FromQuery] GetHelpRequestsPageRequest request)
+    {
+        var result = await _helpRequestService.GetHelpRequestsPage(request);
         return Ok(result);
     }
 
