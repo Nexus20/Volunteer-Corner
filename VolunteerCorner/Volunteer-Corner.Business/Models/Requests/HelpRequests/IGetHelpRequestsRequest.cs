@@ -2,7 +2,7 @@
 
 namespace Volunteer_Corner.Business.Models.Requests.HelpRequests;
 
-public class GetAllHelpRequestsRequest : IGetHelpRequestsRequest
+public interface IGetHelpRequestsRequest
 {
     public string? OwnerId { get; set; }
     public string? SearchString { get; set; }

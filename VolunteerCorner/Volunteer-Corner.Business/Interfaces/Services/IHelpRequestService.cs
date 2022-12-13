@@ -1,5 +1,6 @@
 ﻿using Volunteer_Corner.Business.Models.Dtos.Files;
 using Volunteer_Corner.Business.Models.Requests.HelpRequests;
+using Volunteer_Corner.Business.Models.Results.Abstract;
 using Volunteer_Corner.Business.Models.Results.HelpRequests;
 using Volunteer_Corner.Data.Enums;
 
@@ -15,4 +16,5 @@ public interface IHelpRequestService
     Task DeleteDocumentsAsync(string id, DeleteHelpRequestDocumentsRequest request);
     Task<List<HelpRequestDocumentResult>> AddDocumentsAsync(string id, List<FileDto> filesDtos);
     Task<HelpRequestResponseResult> CreateResponseAsync(string id, string volunteerId, AddHelpRequestResponseRequest request);
+    Task<PageResult<HelpRequestResult>> GetHelpRequestsPage(GetHelpRequestsPageRequest request);
 }

@@ -7,7 +7,9 @@ using Volunteer_Corner.Business.Interfaces.Infrastructure;
 using Volunteer_Corner.Business.Interfaces.Services;
 using Volunteer_Corner.Business.Models.Dtos.Files;
 using Volunteer_Corner.Business.Models.Requests.HelpRequests;
+using Volunteer_Corner.Business.Models.Results.Abstract;
 using Volunteer_Corner.Business.Models.Results.HelpRequests;
+using Volunteer_Corner.Data.Dtos;
 using Volunteer_Corner.Data.Entities;
 using Volunteer_Corner.Data.Enums;
 using Volunteer_Corner.Data.Interfaces;
@@ -44,6 +46,15 @@ public class HelpRequestService : IHelpRequestService
         var source = await _helpRequestRepository.GetAsync(predicate);
 
         var result = _mapper.Map<List<HelpRequest>, List<HelpRequestResult>>(source);
+        return result;
+    }
+
+    public async Task<PageResult<HelpRequestResult>> GetHelpRequestsPage(GetHelpRequestsPageRequest request)
+    {
+        var predicate = CreateFilterPredicate(request);
+        var source = await _helpRequestRepository.GetPageAsync(request.PageNumber, request.TakeCount, predicate);
+
+        var result = _mapper.Map<PageDto<HelpRequest>, PageResult<HelpRequestResult>>(source);
         return result;
     }
 
@@ -224,7 +235,7 @@ public class HelpRequestService : IHelpRequestService
         return result;
     }
 
-    private static Expression<Func<HelpRequest, bool>>? CreateFilterPredicate(GetAllHelpRequestsRequest request)
+    private static Expression<Func<HelpRequest, bool>>? CreateFilterPredicate(IGetHelpRequestsRequest request)
     {
         Expression<Func<HelpRequest, bool>>? predicate = null;
 

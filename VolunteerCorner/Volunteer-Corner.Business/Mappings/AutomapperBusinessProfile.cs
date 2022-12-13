@@ -2,11 +2,13 @@
 using Volunteer_Corner.Business.Models.Requests.Auth;
 using Volunteer_Corner.Business.Models.Requests.HelpRequests;
 using Volunteer_Corner.Business.Models.Requests.Users;
+using Volunteer_Corner.Business.Models.Results.Abstract;
 using Volunteer_Corner.Business.Models.Results.HelpProposals;
 using Volunteer_Corner.Business.Models.Results.HelpRequests;
 using Volunteer_Corner.Business.Models.Results.HelpSeekers;
 using Volunteer_Corner.Business.Models.Results.Users;
 using Volunteer_Corner.Business.Models.Results.Volunteers;
+using Volunteer_Corner.Data.Dtos;
 using Volunteer_Corner.Data.Entities;
 using Volunteer_Corner.Data.Entities.Identity;
 
@@ -51,5 +53,7 @@ public class AutomapperBusinessProfile : Profile
         CreateMap<Role, RoleResult>();
         CreateMap<User, ProfileResult>()
             .ForMember(x => x.Roles, o => o.MapFrom(s => s.UserRoles.Select(ur => ur.Role)));
+
+        CreateMap(typeof(PageDto<>), typeof(PageResult<>));
     }
 }

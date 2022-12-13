@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Volunteer_Corner.Business;
 using Volunteer_Corner.Business.Interfaces.Services;
 using Volunteer_Corner.Business.Models.Requests.HelpSeekers;
+using Volunteer_Corner.Business.Models.Results.Abstract;
 using Volunteer_Corner.Business.Models.Results.HelpRequests;
 using Volunteer_Corner.Business.Models.Results.HelpSeekers;
 
@@ -36,6 +37,20 @@ public class HelpSeekersController : ControllerBase
             result.ForEach(x => { x.HideContacts(); });
         }
 
+        return Ok(result);
+    }
+    
+    [HttpGet("page")]
+    [ProducesResponseType(typeof(PageResult<HelpSeekerResult>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetPage([FromQuery] GetHelpSeekersPageRequest request)
+    {
+        var result = await _helpSeekerService.GetHelpSeekersPage(request);
+        
+        if (User.Identity is { IsAuthenticated: false })
+        {
+            result.Results.ForEach(x => { x.HideContacts(); });
+        }
+        
         return Ok(result);
     }
 

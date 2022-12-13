@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using Volunteer_Corner.Data.Dtos;
 using Volunteer_Corner.Data.Entities.Abstract;
 using Volunteer_Corner.Data.Interfaces;
 
@@ -22,6 +23,36 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEnti
     public Task<List<TEntity>> GetAsync(Expression<Func<TEntity, bool>> predicate)
     {
         return Db.Set<TEntity>().Where(predicate).ToListAsync();
+    }
+
+    public async Task<PageDto<TEntity>> GetPageAsync(int pageNumber, int takeCount, Expression<Func<TEntity, bool>>? predicate = null,
+        Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null)
+    {
+        var query = Db.Set<TEntity>().AsQueryable();
+        
+        if (predicate != null)
+            query = query.Where(predicate);
+
+        if (orderBy != null)
+        {
+            query = orderBy(query);
+        }
+        else
+        {
+            query = query.OrderBy(x => x.Id);
+        }
+
+        var totalCount = await query.CountAsync();
+        var entities = await query.Skip((pageNumber - 1) * takeCount).Take(takeCount).ToListAsync();
+        var hasNextPage = entities.Count >= takeCount;
+
+        return new PageDto<TEntity>()
+        {
+            Results = entities,
+            CurrentPage = pageNumber,
+            HasNextPage = hasNextPage,
+            TotalCount = totalCount
+        };
     }
 
     public Task<List<TEntity>> GetAsync(Expression<Func<TEntity, bool>>? predicate = null,
