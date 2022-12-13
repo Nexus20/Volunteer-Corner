@@ -9,7 +9,7 @@ using NUnit.Framework;
 using Volunteer_Corner.Business.Infrastructure;
 using Volunteer_Corner.Business.Interfaces.Services;
 using Volunteer_Corner.Business.Models.Requests.Auth;
-using Volunteer_Corner.Business.Models.Results;
+using Volunteer_Corner.Business.Models.Results.Auth;
 using Volunteer_Corner.Business.Services;
 using Volunteer_Corner.Data.Entities.Identity;
 
@@ -42,7 +42,7 @@ public class SignInServiceTests
         _jwtHandler = new JwtHandler(_configuration, _mockedUserManager.Object);
           
 
-        _signInService = new SignInService(_mockedUserManager.Object, _jwtHandler);
+        _signInService = new SignInService(_mockedUserManager.Object, _jwtHandler, _mapper);
     }
 
     [TearDown]
