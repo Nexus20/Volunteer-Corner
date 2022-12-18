@@ -60,12 +60,12 @@ public class HelpRequestService : IHelpRequestService
 
     public async Task<HelpRequestResult> GetHelpRequestById(string requestId)
     {
-        var source = await _helpRequestRepository.GetByIdAsync(requestId);
+        var source = await _helpRequestRepository.GetByIdWithResponsesAsync(requestId);
 
         if (source == null)
             throw new NotFoundException(nameof(HelpRequest), requestId);
         
-        var result = _mapper.Map<HelpRequest, HelpRequestResult>(source);
+        var result = _mapper.Map<HelpRequest, HelpRequestWithHelpResponsesResult>(source);
         return result;
     }
     
